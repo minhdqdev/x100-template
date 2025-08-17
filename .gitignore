@@ -1,0 +1,13 @@
+# By default, Claude Code generally respects .gitignore rules
+# for operations like Read() and Edit()
+
+# Environment variables
+**/*.env
+
+# Claude Code settings
+**/.claude/**
+!**/.claude/settings.example.json
+
+**/.vscode/**
+!**/.vscode/settings.example.json
+
