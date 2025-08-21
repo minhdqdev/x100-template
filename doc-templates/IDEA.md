@@ -23,8 +23,7 @@ Architecture: Service-oriented architecture (SOA)
 
 
 
-## Domain model
-
+## Domain
 
 ### Entities
 
