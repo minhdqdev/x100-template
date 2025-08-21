@@ -36,7 +36,9 @@ git submodule update --init --recursive
 
 
 ### 2. AI Agent Integration
-For optimal integration with AI development tools, follow the specific initialization procedures for your chosen AI Agent. For example, if using Claude Code:
+
+#### Setting up Claude Code
+TLDR: generate the `CLAUDE.md` file
 
 Execute the `/init` command within your Claude Code environment to generate the CLAUDE.md file.
 
