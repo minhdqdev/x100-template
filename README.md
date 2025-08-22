@@ -1,4 +1,4 @@
-# Anomaly Detection System (ADS)
+# PROJECT_NAME
 
 > This README.md is supposed to be overridden to include information about your project.
 >
