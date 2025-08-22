@@ -5,9 +5,13 @@
 **/*.env
 
 # Claude Code settings
-**/.claude/**
-!**/.claude/settings.example.json
+.claude/settings.json
+
+
 
 **/.vscode/**
 !**/.vscode/settings.example.json
 
+
+# macOS
+.DS_Store
