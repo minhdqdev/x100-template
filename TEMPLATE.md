@@ -83,6 +83,42 @@ Execute the `/init` command within your Claude Code environment to generate the 
 
 
 
+
+## How to use this template?
+This template will help you in every stage of SDLC, specifically, requirements gathering, design, implementation, testing, deployment, and maintenance.
+
+The output artifacts are usually generated in Markdown format.
+
+### Requirements gathering
+
+#### Just have an idea?
+Write your raw idea in `docs/IDEA.md` then run `/refine-idea` in Claude Code
+
+Output: `docs/REFINED_IDEA.md`
+
+
+
+
+
+### Design
+
+
+### Implementation
+
+
+### Testing
+
+
+### Deployment
+
+
+### Maintainance
+
+
+
+
+
+
 ## Important Considerations
 This repository is provided as a starting template. It should be modified and adapted to meet the unique requirements and specifications of your individual projects. Adjust the submodule configurations and AI Agent integration steps as necessary for compatibility with your development environment and tools.
 

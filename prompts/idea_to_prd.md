@@ -1,2 +1,2 @@
-From docs/IDEA.md, write docs/PRODUCT_REQUIREMENTS_DOCUMENT.md for this project
-- Use doc-templates/PRODUCT_CHARTER.template.md as template.
+From docs/REFINED_IDEA.md, write docs/PRD.md for this project
+- Use doc-templates/LEAN_PRD.template.md as template.

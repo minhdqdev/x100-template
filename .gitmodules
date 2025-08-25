@@ -1,0 +1,8 @@
+[submodule "submodules/frontend"]
+	path = submodules/frontend
+	url = git@github.com:minhdqdev/ads-frontend.git
+	branch = develop
+[submodule "submodules/backend"]
+	path = submodules/backend
+	url = git@github.com:minhdqdev/ads.git
+	branch = develop
