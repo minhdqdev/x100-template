@@ -1,7 +1,7 @@
 # Product Requirements Document (PRD)
 
 ## 1. Document Control
-
+- **Project Code:** [3-4 uppercase letters]
 - **Document Owner:** [Name / Role]
 - **Version:** [v1.0 / Draft / Final]
 - **Date:** [YYYY-MM-DD]

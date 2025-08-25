@@ -34,9 +34,11 @@ This repository serves as a foundational template for new and existing projects,
 
 ## Getting Started
 ### Prerequisites
-- Claude Code
+- Claude Code (other AI agents still can work with a few tweeks)
 
-MCP Tools:
+
+
+MCP Tools (optional):
 - Context7
 
 
@@ -48,7 +50,7 @@ Integrate all related repositories (e.g., frontend, backend, documentation) as s
 
 **Via Command Line:**
 
-```bash
+```shell
 git submodule add -b <branch_name> <repo_url> submodules/<submodule_name>
 ```
 
@@ -56,7 +58,7 @@ git submodule add -b <branch_name> <repo_url> submodules/<submodule_name>
 Alternatively, you can manually edit the .gitmodules file.
 For example:
 
-```bash
+```shell
 [submodule "submodules/frontend"]
 	path = submodules/frontend
 	url = git@github.com:minhdqdev/x100-frontend.git
@@ -69,7 +71,7 @@ For example:
 
 After adding submodules, initialize and update them:
 
-```bash
+```shell
 git submodule update --init --recursive
 ```
 
@@ -77,6 +79,7 @@ git submodule update --init --recursive
 ### 2. AI Agent Integration
 
 #### Setting up Claude Code
+
 TLDR: generate the `CLAUDE.md` file
 
 Execute the `/init` command within your Claude Code environment to generate the CLAUDE.md file.
@@ -84,35 +87,59 @@ Execute the `/init` command within your Claude Code environment to generate the 
 
 
 
+
 ## How to use this template?
 This template will help you in every stage of SDLC, specifically, requirements gathering, design, implementation, testing, deployment, and maintenance.
 
-The output artifacts are usually generated in Markdown format.
 
-### Requirements gathering
+
+### 1. Requirements gathering
+The output artifacts are usually generated in Markdown format. Feel free to edit them.
 
 #### Just have an idea?
-Write your raw idea in `docs/IDEA.md` then run `/refine-idea` in Claude Code
+Run `/refine-idea` in Claude Code
+- Input: `docs/IDEA.md`
+- Output: `docs/REFINED_IDEA.md`
 
-Output: `docs/REFINED_IDEA.md`
-
-
-
-
-
-### Design
-
-
-### Implementation
+#### Write Product Requirements Document
+Run `/gen-prd` in Claude Code
+- Input:  `docs/REFINED_IDEA.md`
+- Output: `docs/PRD.md`
 
 
-### Testing
+### 2.Design
+
+#### Write Design Documents
+
+Run `/design` in Claude Code
+- Input: `docs/PRD.md`
+- Output: design documents from Solutions Architect
+
+### 3. Implementation
+
+#### Build project backlogs
 
 
-### Deployment
 
 
-### Maintainance
+
+
+
+### 4. Testing
+
+#### Write unit tests
+
+#### Write performance tests
+
+
+### 5. Deployment
+
+
+### 6. Maintainance
+
+
+
+### Use sub-agents
 
 
 
