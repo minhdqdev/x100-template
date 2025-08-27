@@ -9,5 +9,5 @@ model: opus
 
 References:
 - `docs/PRD.md`
-- `doc-templates/DESIGN_CHECKLIST.md`
+- `references/DESIGN_CHECKLIST.md`
 - `references/COMPANY_TECH_DESIGN.md`

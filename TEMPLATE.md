@@ -34,13 +34,9 @@ This repository serves as a foundational template for new and existing projects,
 
 ## Getting Started
 ### Prerequisites
-- Claude Code (other AI agents still can work with a few tweeks)
-
-
-
-MCP Tools (optional):
-- Context7
-
+- Basic knowledge of Git and version control
+- Basic knowledge of using AI chatbots (ChatGPT, Gemini, Claude,...)
+- Claude Code (other AI agents still can work with a few tweaks)
 
 
 To set up your project using this template, follow these steps:
@@ -80,6 +76,13 @@ git submodule update --init --recursive
 
 #### Setting up Claude Code
 
+Use this prompt to generate `CLAUDE.md` file:
+```
+Execute `/init` command with `CLAUDE.example.md` as a template.
+```
+
+
+
 TLDR: generate the `CLAUDE.md` file
 
 Execute the `/init` command within your Claude Code environment to generate the CLAUDE.md file.
@@ -91,59 +94,78 @@ Execute the `/init` command within your Claude Code environment to generate the 
 ## How to use this template?
 This template will help you in every stage of SDLC, specifically, requirements gathering, design, implementation, testing, deployment, and maintenance.
 
+The output artifacts are usually generated in Markdown format. Feel free to edit them.
+
+Context is KING. So in every stages, you should maintain and update the context resources in `/references` and `CLAUDE.md`.
 
 
 ### 1. Requirements gathering
-The output artifacts are usually generated in Markdown format. Feel free to edit them.
+> From idea to requirements
 
-#### Just have an idea?
-Run `/refine-idea` in Claude Code
+This template also provides a quick way to refine your ideas. Just run `/refine-idea` in Claude Code
 - Input: `docs/IDEA.md`
 - Output: `docs/REFINED_IDEA.md`
+- Human in the loop:
+  - Review and provide feedback on the refined idea document.
+  - Use 3rd party AI tools (ChatGPT, Claude, Grok, etc.) for additional insights and improvements.
 
 #### Write Product Requirements Document
 Run `/gen-prd` in Claude Code
 - Input:  `docs/REFINED_IDEA.md`
 - Output: `docs/PRD.md`
-
+- Human in the loop:
+  - Review and provide feedback on the generated PRD.
+  - Use 3rd party AI tools for additional insights and improvements.
 
 ### 2.Design
+> From requirements to design
 
 #### Write Design Documents
 
 Run `/design` in Claude Code
 - Input: `docs/PRD.md`
 - Output: design documents from Solutions Architect
+- Human in the loop:
+  - Review and provide feedback on the generated design documents.
+
+To know more about the design documents will be generated, you can refer to the `references/DESIGN_CHECKLIST.md`.
+
+
+
+
+
+Bước 3: Mở 1 tab mới yêu cầu AI mô tả lại cách nó hiểu về dự án, vẽ giả định 3–5 user flow để xem dự án có đúng như mình hình dung hay không.
+
+Mình sẽ bắt AI mô tả đi mô tả lại về cách nó hiểu dự án, để xem nếu nó trả lời đúng ý mình nhất thì có nghĩa là tài liệu đã đầy đủ.
 
 ### 3. Implementation
 
 #### Build project backlogs
 
-
-
-
-
+Run `/build-backlogs` in Claude Code
+- Input: `docs/PRD.md`
+- Output: `docs/BACKLOG.md`
+- Human in the loop:
+  - Review and provide feedback on the generated backlog.
+  - Use 3rd party AI tools for additional insights and improvements.
+  - Break down large tasks into smaller, manageable subtasks.
+  - Prioritize tasks based on business value and complexity.
+  - Estimate effort and time required for each task.
 
 
 ### 4. Testing
 
 #### Write unit tests
+Coming soon...
 
 #### Write performance tests
-
+Coming soon...
 
 ### 5. Deployment
-
+Coming soon...
 
 ### 6. Maintainance
-
-
-
-### Use sub-agents
-
-
-
-
+Coming soon...
 
 
 ## Important Considerations
