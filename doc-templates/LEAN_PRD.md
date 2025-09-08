@@ -2,11 +2,11 @@
 <!-- Lean PRD (Startup Version) -->
 
 ## 1. Overview
-What are we building?
-<!-- Short description in one or two sentences. -->
-
-Why are we building it?
+**Context:**
 <!-- Problem statement + opportunity. -->
+
+**Proposed solution:**
+<!-- Short description in one or two sentences. -->
 
 ## 2. Goals
 Primary outcome (e.g., acquire first 1000 users, validate market demand).
@@ -16,9 +16,8 @@ Key success metric (one or two max).
 ## 3. Users
 Target users / early adopters: Who exactly are they?
 
-User stories (keep it lean):
+User stories: are defined in `docs/user-stories`
 
-As a [type of user], I want [goal] so that [benefit].
 
 ## 4. Scope
 Must-have (MVP): Core features needed to test the idea.
