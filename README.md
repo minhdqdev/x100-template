@@ -29,7 +29,7 @@
   </details>
 </div>
 
-<div align="center">
+<div align="center" height="200px" width="200px">
     <img src=".x100/media/x100-template-logo.webp"/>
     <h1>⚡️ x100-template ⚡️</h1>
     <h3><em>Create high-grade software at speed with AI agent</em></h3>
