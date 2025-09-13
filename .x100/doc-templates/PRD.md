@@ -1,108 +1,57 @@
-# Product Requirements Document (PRD)
+# Product Requirements Document
+<!-- Lean PRD (Startup Version) -->
 
-## 1. Document Control
+## 1. Overview
+What are we building?
+<!-- Short description in one or two sentences. -->
 
-- **Document Owner:** [Name / Role]
-- **Version:** [v1.0 / Draft / Final]
-- **Date:** [YYYY-MM-DD]
-- **Approvers:** [Stakeholders who must sign off]
+Why are we building it?
+<!-- Problem statement + opportunity. -->
 
----
+## 2. Goals
+Primary outcome (e.g., acquire first 1000 users, validate market demand).
 
-## 2. Overview
+Key success metric (one or two max).
 
-### 2.1 Purpose
+## 3. Users
+Target users / early adopters: Who exactly are they?
 
-Explain why this product or feature exists. What problem are we solving? Why now?
+User stories (keep it lean):
 
-### 2.2 Background & Context
+As a [type of user], I want [goal] so that [benefit].
 
-Provide context: market trends, user research, competitive analysis, or internal needs that justify the initiative.
+## 4. Scope
+Must-have (MVP): Core features needed to test the idea.
 
-### 2.3 Goals & Objectives
-
-List clear, measurable goals (e.g., increase user retention by 10%, reduce onboarding drop-off by 20%).
-
----
-
-## 3. Scope
-
-### 3.1 In-Scope
-
-Define what the product/feature **will include**.
-
-### 3.2 Out-of-Scope
-
-Explicitly state what it **will not include**, to avoid scope creep.
-
----
-
-## 4. Target Users
-
-### 4.1 User Personas
-
-Brief descriptions of key personas (e.g., “Anna, 28, busy professional, struggles with X”).
-
-### 4.2 Use Cases / User Stories
-
-- As a [persona], I want to [goal], so that [benefit].
-- As a [persona], I want to [goal], so that [benefit].
-
----
+Nice-to-have (Future): Things we’ll add if the MVP works.
 
 ## 5. Requirements
+Functional (what it should do): 3–5 bullet points only.
 
-### 5.1 Functional Requirements
+Non-functional (constraints): e.g., “must work on mobile web,” “secure sign-in.”
 
-- [FR-1] The system shall …
-- [FR-2] The user can …
+## 6. Design & Experience
 
-### 5.2 Non-Functional Requirements (NFRs)
+Quick sketches, wireframes, or link to Figma.
 
-- Performance: Page loads < 2s
-- Security: Must comply with GDPR
-- Scalability: Support 1M monthly users
+Keep focus on “happy path” flow (main journey users take).
 
-### 5.3 Assumptions & Dependencies
+## 7. Metrics
+Define one or two KPIs that show whether it’s working.
+Examples:
 
-- Assumes X API is available
-- Dependent on Y team delivering service
+% of users completing onboarding
 
----
+Daily active users
 
-## 6. User Experience & Design
+Conversion to paid
 
-- Wireframes / mockups / prototypes (attach or link)
-- Key user flows
+## 8. Risks & Assumptions
+Assumptions we’re testing (e.g., “users will trust us with their data”).
 
----
+Top risks + how we’ll learn/mitigate quickly.
 
-## 7. Success Metrics & KPIs
+## 9. Timeline
+MVP target date: [rough date]
 
-Define how success will be measured.
-
-- Activation rate: X%
-- Conversion rate: Y%
-- Error reduction: Z%
-
----
-
-## 8. Risks & Mitigations
-
-- Risk: API delay → Mitigation: build mock service
-- Risk: Regulatory change → Mitigation: legal review early
-
----
-
-## 9. Release Plan
-
-- **MVP scope:** [features included in first release]
-- **Future iterations:** [planned improvements or phases]
-- **Timeline:** [high-level milestones]
-
----
-
-## 10. Appendix
-
-- Glossary of terms
-- Links to supporting research, Jira tickets, design docs
+Next milestone: [e.g., first 100 users, investor demo]

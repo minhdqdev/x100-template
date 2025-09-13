@@ -153,20 +153,16 @@ your-project-name/
 
 ## Use the template
 
-For AI agent commands, refer to the command files in `.x100/.claude/commands/` (for Claude Code), `.x100/.copilot/commands/` (for GitHub Copilot), `.x100/.gemini/commands/` (for Gemini CLI), or `.x100/.cursor/commands/` (for Cursor).
-
-For OpenAI Codex, you can use the prompts in `.x100/.claude/commands/` as reference.
+For AI agent commands, refer to the command files in `.x100/.claude/commands/` (for Claude Code and OpenAI Codex), `.x100/.copilot/commands/` (for GitHub Copilot), `.x100/.gemini/commands/` (for Gemini CLI)
 
 ### Refine your idea
 1. Define your project idea in `docs/IDEA.md`.
 2. Use AI agent command: `/refine-idea`
-
-The refined idea will be saved to `docs/REFINED_IDEA.md`.
+3. Review and edit the refined idea in `docs/REFINED_IDEA.md`
 
 ### From refined idea to PRD
 1. Use AI agent command: `/generate-prd`
 2. Review and edit the generated PRD in `docs/PRD.md`
-
 
 ### From PRD to product backlog
 1. Use AI agent command: `/generate-product-backlog`
@@ -182,9 +178,8 @@ The refined idea will be saved to `docs/REFINED_IDEA.md`.
 
 
 ## 📚 Core philosophy
-TODO
 
-- **Context engineering is king**
+- **Context engineering is king**: detailed specs, constraints, and guidelines to guide AI agents
 
 - **Intent-driven development** where specifications define the "_what_" before the "_how_"
 - **Heavy reliance** on advanced AI model capabilities for specification interpretation
