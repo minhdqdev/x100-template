@@ -1,6 +1,6 @@
-# Contributing to x100-template
+# Contributing to Agents
 
-Thank you for your interest in contributing to this project. This guide will help you contribute effectively while maintaining a positive community environment.
+Thank you for your interest in contributing to this collection of Claude Code subagents! This guide will help you contribute effectively while maintaining a positive community environment.
 
 ## Before You Contribute
 

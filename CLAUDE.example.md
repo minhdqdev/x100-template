@@ -1,24 +1,3 @@
-# {PROJECT_NAME}
-
-## Project Overview
-
-## Repository Structure
-
-## Common Commands
-
-### Repository Management
-
-### Frontend Development
-
-### Backend Development
-
-## Architecture Overview
-
-### Frontend Architecture
-
-### Backend Architecture
-
-## Instructions
 During the implementation process, you will delegate tasks to the following subagents based on their expertise and capabilities
 
 - Use `planner-researcher` agent to plan for the implementation plan.
