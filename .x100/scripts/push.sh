@@ -28,17 +28,19 @@ fi
 TMPDIR="$(mktemp -d -t x100-sync-XXXXXXXX)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
-echo "→ Forking & cloning $TEMPLATE_REPO ..."
-gh repo fork "$TEMPLATE_REPO" --clone "$TMPDIR/x100-template" --remote --default-branch-only >/dev/null
+echo "→ Cloning $TEMPLATE_REPO ..."
+gh repo clone "$TEMPLATE_REPO" "$TMPDIR/x100-template" >/dev/null
 cd "$TMPDIR/x100-template"
 
-# Discover upstream default branch
-git remote set-head upstream -a >/dev/null 2>&1 || true
-BASE_BRANCH="$(git rev-parse --abbrev-ref upstream/HEAD 2>/dev/null | cut -d/ -f2 || true)"
+# Discover default branch from origin
+git remote set-head origin -a >/dev/null 2>&1 || true
+BASE_BRANCH="$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | cut -d/ -f2 || true)"
 BASE_BRANCH="${BASE_BRANCH:-main}"
 
-BRANCH="x100-sync/$(date +%Y%m%d-%H%M%S)-$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 6)"
-git checkout -b "$BRANCH" "upstream/$BASE_BRANCH"
+# Generate a safe, pipefail-proof 6-char suffix
+RAND_SUFFIX="$(printf '%s' "$(date +%s%N)$RANDOM" | sha256sum | cut -c1-6)"
+BRANCH="x100-sync/$(date +%Y%m%d-%H%M%S)-$RAND_SUFFIX"
+git checkout -b "$BRANCH" "origin/$BASE_BRANCH"
 
 # ================== Sync only .x100 ==================
 echo "→ Syncing .x100/"
@@ -77,11 +79,11 @@ git push -u origin "$BRANCH" >/dev/null
 PR_FLAGS=()
 [[ "${X100_DRAFT:-0}" == "1" ]] && PR_FLAGS+=(--draft)
 
-echo "→ Creating PR to upstream:$BASE_BRANCH ..."
+echo "→ Creating PR to $BASE_BRANCH ..."
 if gh pr create -B "$BASE_BRANCH" -t "$TITLE" -b "$BODY" "${PR_FLAGS[@]}" >/dev/null; then
   gh pr view --json url -q .url || true
   echo "✓ PR created."
 else
   echo "⚠️ Could not auto-create PR. Open manually:"
-  echo "   https://github.com/$TEMPLATE_REPO/compare/$BASE_BRANCH...$(gh repo view --json nameWithOwner -q .nameWithOwner | awk -F/ '{print $1}'):$BRANCH"
+  echo "   https://github.com/$TEMPLATE_REPO/compare/$BASE_BRANCH...$BRANCH"
 fi
