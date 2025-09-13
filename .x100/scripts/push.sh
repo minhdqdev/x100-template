@@ -35,7 +35,7 @@ cd "$TMPDIR/x100-template"
 # Discover default branch from origin
 git remote set-head origin -a >/dev/null 2>&1 || true
 BASE_BRANCH="$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | cut -d/ -f2 || true)"
-BASE_BRANCH="${BASE_BRANCH:-main}"
+BASE_BRANCH="${BASE_BRANCH:-develop}"
 
 # Generate a safe, pipefail-proof 6-char suffix
 RAND_SUFFIX="$(printf '%s' "$(date +%s%N)$RANDOM" | sha256sum | cut -c1-6)"
