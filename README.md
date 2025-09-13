@@ -157,26 +157,27 @@ For AI agent commands, refer to the command files in `.x100/.claude/commands/` (
 
 For OpenAI Codex, you can use the prompts in `.x100/.claude/commands/` as reference.
 
-### From raw idea to refined idea
+### Refine your idea
 1. Define your project idea in `docs/IDEA.md`.
 2. Use AI agent command: `/refine-idea`
 
+The refined idea will be saved to `docs/REFINED_IDEA.md`.
 
 ### From refined idea to PRD
 1. Use AI agent command: `/generate-prd`
 2. Review and edit the generated PRD in `docs/PRD.md`
 
-### From PRD to implementation plan
-1. Use AI agent command: `/generate-implementation-plan`
-2. Review and edit the generated implementation plan in `docs/IMPLEMENTATION_PLAN.md`
+
+### From PRD to product backlog
+1. Use AI agent command: `/generate-product-backlog`
+2. Review and edit the generated product backlog in `docs/PRODUCT_BACKLOG.md`
+
+### From product backlog to user stories
+1. Use AI agent command: `/generate-user-stories`
+2. Review and edit the generated user stories in `docs/user-stories/US-<ID>.md`
 
 ### From implementation plan to code
-1. Use AI agent command: `/implement`
-2. Review and edit the generated code in `submodules/` directories
-
-### From code to tests
-1. Use AI agent command: `/generate-tests`
-2. Review and edit the generated tests in `submodules/` directories
+1. Use AI agent to read the user stories and complete the tasks.
 
 
 
@@ -189,6 +190,8 @@ TODO
 - **Heavy reliance** on advanced AI model capabilities for specification interpretation
 
 - **Human-in-the-loop** for critical thinking, creativity, and oversight
+
+- **Agile methodologies** adapted for AI-augmented workflows: epics, user stories, tasks
 
 - Use `AGENTS.md` for all agents used in the project
   - Read more in [here](https://agents.md)
