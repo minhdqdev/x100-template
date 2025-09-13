@@ -29,7 +29,7 @@
   </details>
 </div>
 
-<div align="center" height="200px" width="200px">
+<div align="center">
     <img src=".x100/media/x100-template-logo.webp"/>
     <h1>⚡️ x100-template ⚡️</h1>
     <h3><em>Create high-grade software at speed with AI agent</em></h3>
@@ -46,50 +46,137 @@ A starter blueprint for new and existing projects, built to speed up dev workflo
 - **AI coding agent**: [OpenAI Codex](https://openai.com/codex/), [Claude Code](https://www.anthropic.com/claude-code), [GitHub Copilot](https://code.visualstudio.com/), [Gemini CLI](https://github.com/google-gemini/gemini-cli), or [Cursor](https://cursor.sh/)
 <!-- - [uv](https://docs.astral.sh/uv/) for package management -->
 <!-- - [Python 3.11+](https://www.python.org/downloads/) -->
-- [Git](https://git-scm.com/downloads)
+- Basic familiarity with [Git](https://git-scm.com/downloads) and Git submodules
+- Basic familiarity with Markdown, and shell scripting
+
+Now you may want to set up your project using one of the following options:
 
 ### Option 1: Bootstrap a project from scratch
 
-1. Clone or fork this repository:
+1. Clone or fork this repository
 
 ```bash
 git clone https://github.com/minhdqdev/x100-template.git your-project-name
 cd your-project-name
 ```
 
+2. Setup VSCode (optional but recommended)
 
+```bash
+mkdir -p .vscode
+cp .vscode/settings.example.json .vscode/settings.json
+```
+
+That's it! You can now start defining your project idea in `docs/IDEA.md` and use the AI agent commands to generate refined ideas, PRDs, implementation plans, code, and tests.
+
+Read more in the [Use the template](#use-the-template) section below.
 
 ### Option 2: Integrate this template to an existing project
 
-#### 1. Configure Submodules
-Integrate all related repositories (e.g., frontend, backend, documentation) as submodules.
+1. Setup a Git repository for your existing project if you haven't done so:
 
-**Via Command Line:**
+```bash
+cd your-existing-project && git init
+```
+
+2. Move your existing source code to subdirectory (e.g., `submodules/frontend`, `submodules/backend`, etc.) to keep things organized.
+
+```bash
+mkdir -p submodules/frontend submodules/backend
+mv your-existing-frontend-code submodules/frontend/
+mv your-existing-backend-code submodules/backend/
+```
+
+1. Add submodules for your existing code if applicable (skip if not using Git):
 
 ```bash
 git submodule add -b <branch_name> <repo_url> submodules/<submodule_name>
 ```
 
-**Via `.gitmodules` (Manual Configuration):**
-Alternatively, you can manually edit the .gitmodules file.
-For example:
+4. Copy the `.x100` directory from this repository to your existing project.
 
 ```bash
-[submodule "submodules/frontend"]
-	path = submodules/frontend
-	url = git@github.com:minhdqdev/x100-frontend.git
-	branch = develop
-[submodule "submodules/backend"]
-	path = submodules/backend
-	url = git@github.com:minhdqdev/x100-backend.git
-	branch = develop
+git clone https://github.com/minhdqdev/x100-template.git
+
+cp -r x100-template/.x100 ./your-existing-project
+rm -rf x100-template
 ```
 
-After adding submodules, initialize and update them:
+5. Create `docs/` directory if it doesn't exist
 
 ```bash
-git submodule update --init --recursive
+mkdir -p docs
 ```
+
+6. Setup AI agent
+   1. For GitHub Copilot, copy `.x100/.copilot` to your project root
+   2. For Claude Code, copy `.x100/.claude` to your project root
+   3. For Gemini CLI, copy `.x100/.gemini` to your project root
+   4. For Cursor, copy `.x100/.cursor` to your project root
+
+TODO: Add setup script for AI agents
+
+7. Setup VSCode (optional but recommended)
+
+```bash
+mkdir -p .vscode
+cp .x100/.vscode/settings.json .vscode/settings.json
+```
+
+**Checkpoint**: You should now have a project structure similar to this:
+
+```bash
+your-project-name/
+├── .git/
+├── .vscode/
+│   ├── settings.json
+├── .copilot/  (if using GitHub Copilot)
+├── .claude/   (if using Claude Code)
+├── .gemini/   (if using Gemini CLI)
+├── .cursor/   (if using Cursor)
+├── .x100/
+│   ├── agents/
+│   ├── specs/
+│   ├── tools/
+│   ├── .env.example
+│   ├── config.yaml
+│   └── ...
+├── submodules/
+│   ├── frontend/
+│   └── backend/
+│   └── ...
+├── docs/
+└── ...
+```
+
+
+
+## Use the template
+
+For AI agent commands, refer to the command files in `.x100/.claude/commands/` (for Claude Code), `.x100/.copilot/commands/` (for GitHub Copilot), `.x100/.gemini/commands/` (for Gemini CLI), or `.x100/.cursor/commands/` (for Cursor).
+
+For OpenAI Codex, you can use the prompts in `.x100/.claude/commands/` as reference.
+
+### From raw idea to refined idea
+1. Define your project idea in `docs/IDEA.md`.
+2. Use AI agent command: `/refine-idea`
+
+
+### From refined idea to PRD
+1. Use AI agent command: `/generate-prd`
+2. Review and edit the generated PRD in `docs/PRD.md`
+
+### From PRD to implementation plan
+1. Use AI agent command: `/generate-implementation-plan`
+2. Review and edit the generated implementation plan in `docs/IMPLEMENTATION_PLAN.md`
+
+### From implementation plan to code
+1. Use AI agent command: `/implement`
+2. Review and edit the generated code in `submodules/` directories
+
+### From code to tests
+1. Use AI agent command: `/generate-tests`
+2. Review and edit the generated tests in `submodules/` directories
 
 
 
@@ -101,13 +188,10 @@ TODO
 - **Intent-driven development** where specifications define the "_what_" before the "_how_"
 - **Heavy reliance** on advanced AI model capabilities for specification interpretation
 
+- **Human-in-the-loop** for critical thinking, creativity, and oversight
 
-## 🙏 Acknowledgements
-This repository is provided as a starting template. It should be modified and adapted to meet the unique requirements and specifications of your individual projects. Adjust the submodule configurations and AI Agent integration steps as necessary for compatibility with your development environment and tools.
-
-## 🔍 Troubleshooting
-TODO
-
+- Use `AGENTS.md` for all agents used in the project
+  - Read more in [here](https://agents.md)
 
 ## 👥 Maintainers
 - Minh Dang Quang ([@minhdqdev](https://github.com/minhdqdev))

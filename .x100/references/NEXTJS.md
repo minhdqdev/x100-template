@@ -4,7 +4,7 @@
 
 - **Versions:** Next 15.x, React 19, TypeScript strict, ESLint (next/core-web-vitals), Ruff-equivalent for JS? Use **Biome** (fast) or ESLint+Prettier.
 - **Folders:**
-    `repo/   apps/web/ (Next.js)   packages/ui/ (design system, headless + Tailwind)   packages/config/ (tsconfig, eslint, shared types)   infra/ (docker, deploy, terraform)`
+    `repo/   apps/web/ (Next.js)   packages/ui/ (design system, headless + Tailwind)   packages/config/ (tsconfig, eslint, shared types)   deploy/ (docker, deploy, terraform)`
     If single app, keep `/src` with `app/`, `lib/`, `components/`, `styles/`, `server/`, `db/`.
 - **Module boundaries:** `app/` for routing & server components, `components/` for client components, `lib/` for pure utils, `server/` for actions/services (server-only), `db/` for Prisma.
 
