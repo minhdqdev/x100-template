@@ -16,23 +16,31 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_X100_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"   # points to .x100
 
 
-# Optional provenance from the host project (if it's a git repo)
+# Provenance (prefer the .x100 repo itself; fallback to host project)
 SRC_PROJECT_ROOT="$(cd "$SRC_X100_DIR/.." 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null || true)"
 SRC_REMOTE="local snapshot"; SRC_COMMIT="n/a"
-if [[ -n "$SRC_PROJECT_ROOT" ]]; then
+if git -C "$SRC_X100_DIR" rev-parse >/dev/null 2>&1; then
+  SRC_REMOTE="$(git -C "$SRC_X100_DIR" remote get-url origin 2>/dev/null || echo "$SRC_REMOTE")"
+  SRC_COMMIT="$(git -C "$SRC_X100_DIR" rev-parse --short HEAD 2>/dev/null || echo "$SRC_COMMIT")"
+elif [[ -n "$SRC_PROJECT_ROOT" ]]; then
   SRC_REMOTE="$(git -C "$SRC_PROJECT_ROOT" remote get-url origin 2>/dev/null || echo "$SRC_REMOTE")"
   SRC_COMMIT="$(git -C "$SRC_PROJECT_ROOT" rev-parse --short HEAD 2>/dev/null || echo "$SRC_COMMIT")"
+fi
+
+# ================== Determine target repo (origin of .x100 repo) ==================
+TARGET_REPO_URL="$(git -C "$SRC_X100_DIR" remote get-url origin 2>/dev/null || true)"
+if [[ -z "$TARGET_REPO_URL" ]]; then
+  echo "Could not determine origin remote of .x100 project. Aborting." >&2
+  exit 1
 fi
 
 # ================== Workspace ==================
 TMPDIR="$(mktemp -d -t x100-sync-XXXXXXXX)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
-echo "→ Cloning $TEMPLATE_REPO ..."
-gh repo clone "$TEMPLATE_REPO" "$TMPDIR/x100-template" >/dev/null
-echo "→ Cloning $TEMPLATE_REPO ..."
-gh repo clone "$TEMPLATE_REPO" "$TMPDIR/x100-template" >/dev/null
-cd "$TMPDIR/x100-template"
+echo "→ Cloning $TARGET_REPO_URL ..."
+gh repo clone "$TARGET_REPO_URL" "$TMPDIR/target-repo" >/dev/null
+cd "$TMPDIR/target-repo"
 
 # Choose base branch (prefer 'develop')
 TARGET_BRANCH="${X100_BASE_BRANCH:-develop}"
@@ -45,16 +53,28 @@ else
   BASE_BRANCH="${BASE_BRANCH:-$TARGET_BRANCH}"
 fi
 
-# Generate a safe, pipefail-proof 6-char suffix
-RAND_SUFFIX="$(printf '%s' "$(date +%s%N)$RANDOM" | sha256sum | cut -c1-6)"
+# Generate a portable 6-char suffix (sha256sum or shasum)
+_hash_input="$(date +%s%N)$RANDOM"
+if command -v sha256sum >/dev/null 2>&1; then
+  RAND_SUFFIX="$(printf '%s' "$_hash_input" | sha256sum | cut -c1-6)"
+else
+  RAND_SUFFIX="$(printf '%s' "$_hash_input" | shasum -a 256 | cut -c1-6)"
+fi
 BRANCH="x100-sync/$(date +%Y%m%d-%H%M%S)-$RAND_SUFFIX"
 git checkout -b "$BRANCH" "origin/$BASE_BRANCH"
 
-# ================== Sync only .x100 ==================
+# ================== Sync only .x100 back to origin repo ==================
 echo "→ Syncing .x100/"
 mkdir -p .x100
 if command -v rsync >/dev/null 2>&1; then
-  rsync -a --delete --exclude=".git" "$SRC_X100_DIR"/ .x100/
+  rsync -a --delete \
+    --exclude=".git" \
+    --exclude=".venv" \
+    --exclude="__pycache__/" \
+    --exclude=".DS_Store" \
+    --exclude="tags" \
+    --exclude=".cache" \
+    "$SRC_X100_DIR"/ .x100/
 else
   (cd "$SRC_X100_DIR" && tar cf - .) | (cd .x100 && tar xpf -)
   find .x100 -name ".git" -type d -exec rm -rf {} + || true
@@ -84,16 +104,14 @@ git commit -m "$TITLE" -m "$BODY"
 git push -u origin "$BRANCH" >/dev/null
 
 # ================== Open PR ==================
-PR_FLAGS=()
-[[ "${X100_DRAFT:-0}" == "1" ]] && PR_FLAGS+=(--draft)
+PR_DRAFT_FLAG=""
+if [[ "${X100_DRAFT:-0}" == "1" ]]; then PR_DRAFT_FLAG="--draft"; fi
 
 echo "→ Creating PR to $BASE_BRANCH ..."
-echo "→ Creating PR to $BASE_BRANCH ..."
-if gh pr create -B "$BASE_BRANCH" -t "$TITLE" -b "$BODY" "${PR_FLAGS[@]}" >/dev/null; then
+if gh pr create -B "$BASE_BRANCH" -t "$TITLE" -b "$BODY" ${PR_DRAFT_FLAG:+$PR_DRAFT_FLAG} >/dev/null; then
   gh pr view --json url -q .url || true
   echo "✓ PR created."
 else
   echo "⚠️ Could not auto-create PR. Open manually:"
-  echo "   https://github.com/$TEMPLATE_REPO/compare/$BASE_BRANCH...$BRANCH"
   echo "   https://github.com/$TEMPLATE_REPO/compare/$BASE_BRANCH...$BRANCH"
 fi

@@ -53,18 +53,15 @@ Now you may want to set up your project using one of the following options:
 
 ### Option 1: Bootstrap a project from scratch
 
-1. Clone or fork this repository
-
 ```bash
-git clone https://github.com/minhdqdev/x100-template.git your-project-name
 cd your-project-name
-```
 
-2. Setup VSCode (optional but recommended)
-
-```bash
-mkdir -p .vscode
-cp .vscode/settings.example.json .vscode/settings.json
+# Clone the template repository to .x100 (directory name is important)
+git clone https://github.com/minhdqdev/x100-template.git .x100
+chmod +x .x100/scripts/*.sh
+chmod +x .x100/x100
+ln -s .x100/x100 x100  # optional symlink for easier access
+bash .x100/x100 init
 ```
 
 That's it! You can now start defining your project idea in `docs/IDEA.md` and use the AI agent commands to generate refined ideas, PRDs, implementation plans, code, and tests.
@@ -193,6 +190,16 @@ For AI agent commands, refer to the command files in `.x100/.claude/commands/` (
 
 ## 👥 Maintainers
 - Minh Dang Quang ([@minhdqdev](https://github.com/minhdqdev))
+
+
+## 🤝 Contributing
+If you have integrated this template into your project, please consider contributing back any improvements to the original [x100-template](https://github.com/minhdqdev/x100-template). We have provided a very convenient way to help you do so, just run:
+
+```bash
+./x100 contribute
+```
+
+Read more in the [Contributing Guide](./.github/CONTRIBUTING.md).
 
 
 ## 💬 Support

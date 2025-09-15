@@ -1,4 +1,4 @@
-# Contributing to Agents
+# Contributing to x100-template
 
 Thank you for your interest in contributing to this collection of Claude Code subagents! This guide will help you contribute effectively while maintaining a positive community environment.
 

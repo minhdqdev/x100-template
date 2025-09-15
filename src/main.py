@@ -422,7 +422,7 @@ def verify() -> None:
     input("Press Enter to return to menu…")
 
 
-def init_project() -> None:
+def init_project(wait_for_key: bool = True) -> None:
     tool_dir = TOOL_ROOT
     outer_dir = OUTER_DIR
     resources_dir = os.path.join(TOOL_ROOT, "resources")
@@ -590,7 +590,8 @@ exec "$(dirname "$0")/.x100/x100" "$@"
                 print(f"{YELLOW}Note:{RESET} Could not create Windows launcher: {e}")
 
     print()
-    input("Press Enter to return to menu…")
+    if wait_for_key:
+        input("Press Enter to return to menu…")
 
 
 def exit_app() -> None:
@@ -626,6 +627,13 @@ def menu_loop(options: List[str], actions: List[Callable[[], None]]) -> None:
 
 
 def main() -> None:
+    # Subcommand support: `x100 init` jumps straight to Init project
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1].lower()
+        if cmd in ("init", "initialize", "init-project"):
+            clear_screen()
+            init_project(wait_for_key=False)
+            return
     options = [
         "Init project",
         "Setup VSCode",
