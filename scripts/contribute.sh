@@ -63,9 +63,8 @@ fi
 BRANCH="x100-sync/$(date +%Y%m%d-%H%M%S)-$RAND_SUFFIX"
 git checkout -b "$BRANCH" "origin/$BASE_BRANCH"
 
-# ================== Sync only .x100 back to origin repo ==================
-echo "→ Syncing .x100/"
-mkdir -p .x100
+# ================== Sync workspace into repo root ==================
+echo "→ Syncing workspace into repository root"
 if command -v rsync >/dev/null 2>&1; then
   rsync -a --delete \
     --exclude=".git" \
@@ -74,29 +73,34 @@ if command -v rsync >/dev/null 2>&1; then
     --exclude=".DS_Store" \
     --exclude="tags" \
     --exclude=".cache" \
-    "$SRC_X100_DIR"/ .x100/
+    "$SRC_X100_DIR"/ ./
 else
-  (cd "$SRC_X100_DIR" && tar cf - .) | (cd .x100 && tar xpf -)
-  find .x100 -name ".git" -type d -exec rm -rf {} + || true
+  # Fallback using tar, with necessary excludes to protect the repo's .git
+  (cd "$SRC_X100_DIR" && tar \
+    --exclude=".git" \
+    --exclude=".venv" \
+    --exclude="__pycache__" \
+    --exclude=".DS_Store" \
+    --exclude="tags" \
+    --exclude=".cache" \
+    -cf - .) | tar xpf -
 fi
 
-git add .x100
+git add -A
 
 if git diff --cached --quiet; then
-  echo "✓ No changes in .x100 to contribute. Bye."
+  echo "✓ No changes to contribute. Bye."
   exit 0
 fi
 
-TITLE="Sync .x100 from ${SRC_REMOTE}"
+TITLE="Sync from ${SRC_REMOTE}"
 BODY=$(
   cat <<EOF
-This PR updates \`.x100\` by syncing from:
+This PR syncs repository contents from:
 
 - source: ${SRC_REMOTE}
 - commit: ${SRC_COMMIT}
 - created: $(date -u +"%Y-%m-%d %H:%M:%SZ") (UTC)
-
-Only \`.x100\` is modified.
 EOF
 )
 
@@ -113,5 +117,11 @@ if gh pr create -B "$BASE_BRANCH" -t "$TITLE" -b "$BODY" ${PR_DRAFT_FLAG:+$PR_DR
   echo "✓ PR created."
 else
   echo "⚠️ Could not auto-create PR. Open manually:"
-  echo "   https://github.com/$TEMPLATE_REPO/compare/$BASE_BRANCH...$BRANCH"
+  # Derive owner/repo from the checked-out repo for an accurate compare URL
+  if gh repo view --json nameWithOwner -q .nameWithOwner >/dev/null 2>&1; then
+    OWNER_REPO="$(gh repo view --json nameWithOwner -q .nameWithOwner)"
+    echo "   https://github.com/$OWNER_REPO/compare/$BASE_BRANCH...$BRANCH"
+  else
+    echo "   Compare $BRANCH against $BASE_BRANCH on the target repository."
+  fi
 fi
