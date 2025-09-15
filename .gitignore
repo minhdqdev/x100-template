@@ -4,6 +4,9 @@
 # Environment variables
 **/*.env
 
+# Python venv
+**/.venv/
+
 # Claude Code settings
 .claude/settings.json
 
@@ -17,3 +20,9 @@
 .DS_Store
 
 docs/
+
+
+tags
+
+
+config.json

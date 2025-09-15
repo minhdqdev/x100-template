@@ -30,12 +30,20 @@ trap 'rm -rf "$TMPDIR"' EXIT
 
 echo "→ Cloning $TEMPLATE_REPO ..."
 gh repo clone "$TEMPLATE_REPO" "$TMPDIR/x100-template" >/dev/null
+echo "→ Cloning $TEMPLATE_REPO ..."
+gh repo clone "$TEMPLATE_REPO" "$TMPDIR/x100-template" >/dev/null
 cd "$TMPDIR/x100-template"
 
-# Discover default branch from origin
-git remote set-head origin -a >/dev/null 2>&1 || true
-BASE_BRANCH="$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | cut -d/ -f2 || true)"
-BASE_BRANCH="${BASE_BRANCH:-develop}"
+# Choose base branch (prefer 'develop')
+TARGET_BRANCH="${X100_BASE_BRANCH:-develop}"
+if git ls-remote --exit-code --heads origin "$TARGET_BRANCH" >/dev/null 2>&1; then
+  BASE_BRANCH="$TARGET_BRANCH"
+else
+  # Fall back to repo default branch, then to TARGET_BRANCH
+  git remote set-head origin -a >/dev/null 2>&1 || true
+  BASE_BRANCH="$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | cut -d/ -f2 || true)"
+  BASE_BRANCH="${BASE_BRANCH:-$TARGET_BRANCH}"
+fi
 
 # Generate a safe, pipefail-proof 6-char suffix
 RAND_SUFFIX="$(printf '%s' "$(date +%s%N)$RANDOM" | sha256sum | cut -c1-6)"
@@ -80,10 +88,12 @@ PR_FLAGS=()
 [[ "${X100_DRAFT:-0}" == "1" ]] && PR_FLAGS+=(--draft)
 
 echo "→ Creating PR to $BASE_BRANCH ..."
+echo "→ Creating PR to $BASE_BRANCH ..."
 if gh pr create -B "$BASE_BRANCH" -t "$TITLE" -b "$BODY" "${PR_FLAGS[@]}" >/dev/null; then
   gh pr view --json url -q .url || true
   echo "✓ PR created."
 else
   echo "⚠️ Could not auto-create PR. Open manually:"
+  echo "   https://github.com/$TEMPLATE_REPO/compare/$BASE_BRANCH...$BRANCH"
   echo "   https://github.com/$TEMPLATE_REPO/compare/$BASE_BRANCH...$BRANCH"
 fi
