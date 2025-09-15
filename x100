@@ -33,4 +33,4 @@ if [ -f "${SCRIPT_DIR}/requirements.txt" ]; then
 fi
 
 PY="$VENV_DIR/bin/python"
-exec "$PY" "$SCRIPT_DIR/main.py" "$@"
+exec "$PY" "$SCRIPT_DIR/src/main.py" "$@"

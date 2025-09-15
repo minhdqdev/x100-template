@@ -4,6 +4,9 @@
 # Environment variables
 **/*.env
 
+# Python venv
+**/.venv/
+
 # Claude Code settings
 .claude/settings.json
 
@@ -20,3 +23,6 @@ docs/
 
 
 tags
+
+
+config.json

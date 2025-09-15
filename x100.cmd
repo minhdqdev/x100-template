@@ -21,4 +21,4 @@ if exist "%SCRIPT_DIR%requirements.txt" (
 )
 
 set PY=%VENV_DIR%\Scripts\python.exe
-"%PY%" "%SCRIPT_DIR%main.py" %*
+"%PY%" "%SCRIPT_DIR%src\main.py" %*
