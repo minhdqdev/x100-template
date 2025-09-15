@@ -30,8 +30,6 @@ trap 'rm -rf "$TMPDIR"' EXIT
 
 echo "→ Cloning $TEMPLATE_REPO ..."
 gh repo clone "$TEMPLATE_REPO" "$TMPDIR/x100-template" >/dev/null
-echo "→ Cloning $TEMPLATE_REPO ..."
-gh repo clone "$TEMPLATE_REPO" "$TMPDIR/x100-template" >/dev/null
 cd "$TMPDIR/x100-template"
 
 # Choose base branch (prefer 'develop')
@@ -45,38 +43,63 @@ else
   BASE_BRANCH="${BASE_BRANCH:-$TARGET_BRANCH}"
 fi
 
-# Generate a safe, pipefail-proof 6-char suffix
-RAND_SUFFIX="$(printf '%s' "$(date +%s%N)$RANDOM" | sha256sum | cut -c1-6)"
+# Generate a portable 6-char suffix (sha256sum or shasum)
+_hash_input="$(date +%s%N)$RANDOM"
+if command -v sha256sum >/dev/null 2>&1; then
+  RAND_SUFFIX="$(printf '%s' "$_hash_input" | sha256sum | cut -c1-6)"
+else
+  RAND_SUFFIX="$(printf '%s' "$_hash_input" | shasum -a 256 | cut -c1-6)"
+fi
 BRANCH="x100-sync/$(date +%Y%m%d-%H%M%S)-$RAND_SUFFIX"
 git checkout -b "$BRANCH" "origin/$BASE_BRANCH"
 
-# ================== Sync only .x100 ==================
-echo "→ Syncing .x100/"
-mkdir -p .x100
-if command -v rsync >/dev/null 2>&1; then
-  rsync -a --delete --exclude=".git" "$SRC_X100_DIR"/ .x100/
-else
-  (cd "$SRC_X100_DIR" && tar cf - .) | (cd .x100 && tar xpf -)
-  find .x100 -name ".git" -type d -exec rm -rf {} + || true
+# ================== Sync whole repository ==================
+# Determine source project root (host repo)
+if [[ -z "$SRC_PROJECT_ROOT" ]]; then
+  SRC_PROJECT_ROOT="$(cd "$SRC_X100_DIR/.." 2>/dev/null && pwd)"
+fi
+if [[ -z "$SRC_PROJECT_ROOT" ]]; then
+  echo "Could not determine source project root. Aborting." >&2
+  exit 1
 fi
 
-git add .x100
+echo "→ Syncing entire repository from: $SRC_PROJECT_ROOT"
+if command -v rsync >/dev/null 2>&1; then
+  rsync -a --delete \
+    --exclude=".git" \
+    --exclude=".venv" \
+    --exclude="__pycache__/" \
+    --exclude=".DS_Store" \
+    --exclude="node_modules" \
+    --exclude=".pnpm-store" \
+    --exclude="tags" \
+    --exclude=".cache" \
+    --exclude="*.pyc" \
+    --exclude="*.pyo" \
+    --exclude=".mypy_cache" \
+    "$SRC_PROJECT_ROOT"/ ./
+else
+  (cd "$SRC_PROJECT_ROOT" && tar --exclude .git -cf - .) | tar xpf -
+  find . -name ".git" -type d -prune -o -name "__pycache__" -type d -exec rm -rf {} + || true
+fi
+
+git add -A
 
 if git diff --cached --quiet; then
-  echo "✓ No changes in .x100 to contribute. Bye."
+  echo "✓ No changes to contribute. Bye."
   exit 0
 fi
 
-TITLE="Sync .x100 from ${SRC_REMOTE}"
+TITLE="Sync repository from ${SRC_REMOTE}"
 BODY=$(
   cat <<EOF
-This PR updates \`.x100\` by syncing from:
+This PR updates the repository by syncing from:
 
 - source: ${SRC_REMOTE}
 - commit: ${SRC_COMMIT}
 - created: $(date -u +"%Y-%m-%d %H:%M:%SZ") (UTC)
 
-Only \`.x100\` is modified.
+All changes reflect the current state of the source repository (excluding VCS/caches).
 EOF
 )
 
@@ -84,16 +107,14 @@ git commit -m "$TITLE" -m "$BODY"
 git push -u origin "$BRANCH" >/dev/null
 
 # ================== Open PR ==================
-PR_FLAGS=()
-[[ "${X100_DRAFT:-0}" == "1" ]] && PR_FLAGS+=(--draft)
+PR_DRAFT_FLAG=""
+if [[ "${X100_DRAFT:-0}" == "1" ]]; then PR_DRAFT_FLAG="--draft"; fi
 
 echo "→ Creating PR to $BASE_BRANCH ..."
-echo "→ Creating PR to $BASE_BRANCH ..."
-if gh pr create -B "$BASE_BRANCH" -t "$TITLE" -b "$BODY" "${PR_FLAGS[@]}" >/dev/null; then
+if gh pr create -B "$BASE_BRANCH" -t "$TITLE" -b "$BODY" ${PR_DRAFT_FLAG:+$PR_DRAFT_FLAG} >/dev/null; then
   gh pr view --json url -q .url || true
   echo "✓ PR created."
 else
   echo "⚠️ Could not auto-create PR. Open manually:"
-  echo "   https://github.com/$TEMPLATE_REPO/compare/$BASE_BRANCH...$BRANCH"
   echo "   https://github.com/$TEMPLATE_REPO/compare/$BASE_BRANCH...$BRANCH"
 fi

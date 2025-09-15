@@ -1,0 +1,20 @@
+{
+  "python.languageServer": "Pylance",
+  "pylint.args": [
+    "--disable=C0115",
+    "--load-plugins=pylint_django,pylint_celery",
+    "--django-settings-module=submodules.backend.src.backend.YOUR_PROJECT.settings",
+    "submodules/backend/src/backend/YOUR_PROJECT"
+  ],
+  "black-formatter.args": [
+    "--line-length=119"
+  ],
+  "python.analysis.extraPaths": [
+    "./submodules/backend/src/backend"
+  ],
+  "python.analysis.autoImportCompletions": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "always"
+  },
+  "postman.settings.dotenv-detection-notification-visibility": false
+}
