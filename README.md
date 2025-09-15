@@ -30,7 +30,7 @@
 </div>
 
 <div align="center">
-    <img src=".x100/media/x100-template-logo.webp"/>
+    <img src="media/x100-template-logo.webp"/>
     <h1>⚡️ x100-template ⚡️</h1>
     <h3><em>Create high-grade software at speed with AI agent</em></h3>
 </div>
@@ -64,61 +64,16 @@ ln -s .x100/x100 x100  # optional symlink for easier access
 bash .x100/x100 init
 ```
 
+If your project uses Git, you may want to add this template as a submodule for your code:
+
+```bash
+git submodule add -b <branch_name> <repo_url> .x100
+```
+
+
 That's it! You can now start defining your project idea in `docs/IDEA.md` and use the AI agent commands to generate refined ideas, PRDs, implementation plans, code, and tests.
 
 Read more in the [Use the template](#use-the-template) section below.
-
-### Option 2: Integrate this template to an existing project
-
-1. Setup a Git repository for your existing project if you haven't done so:
-
-```bash
-cd your-existing-project && git init
-```
-
-2. Move your existing source code to subdirectory (e.g., `submodules/frontend`, `submodules/backend`, etc.) to keep things organized.
-
-```bash
-mkdir -p submodules/frontend submodules/backend
-mv your-existing-frontend-code submodules/frontend/
-mv your-existing-backend-code submodules/backend/
-```
-
-1. Add submodules for your existing code if applicable (skip if not using Git):
-
-```bash
-git submodule add -b <branch_name> <repo_url> submodules/<submodule_name>
-```
-
-4. Copy the `.x100` directory from this repository to your existing project.
-
-```bash
-git clone https://github.com/minhdqdev/x100-template.git
-
-cp -r x100-template/.x100 ./your-existing-project
-rm -rf x100-template
-```
-
-5. Create `docs/` directory if it doesn't exist
-
-```bash
-mkdir -p docs
-```
-
-6. Setup AI agent
-   1. For GitHub Copilot, copy `.x100/.copilot` to your project root
-   2. For Claude Code, copy `.x100/.claude` to your project root
-   3. For Gemini CLI, copy `.x100/.gemini` to your project root
-   4. For Cursor, copy `.x100/.cursor` to your project root
-
-TODO: Add setup script for AI agents
-
-7. Setup VSCode (optional but recommended)
-
-```bash
-mkdir -p .vscode
-cp .x100/.vscode/settings.json .vscode/settings.json
-```
 
 **Checkpoint**: You should now have a project structure similar to this:
 
@@ -132,11 +87,9 @@ your-project-name/
 ├── .gemini/   (if using Gemini CLI)
 ├── .cursor/   (if using Cursor)
 ├── .x100/
-│   ├── agents/
-│   ├── specs/
-│   ├── tools/
-│   ├── .env.example
-│   ├── config.yaml
+│   ├── resources/
+│   ├── scripts/
+│   ├── config.json
 │   └── ...
 ├── submodules/
 │   ├── frontend/
@@ -145,7 +98,6 @@ your-project-name/
 ├── docs/
 └── ...
 ```
-
 
 
 ## Use the template
@@ -198,6 +150,8 @@ If you have integrated this template into your project, please consider contribu
 ```bash
 ./x100 contribute
 ```
+
+You need to install `gh` CLI and authenticate it with your GitHub account first. This command will create a fork of the original repository, commit your changes to a new branch, and open a pull request for you.
 
 Read more in the [Contributing Guide](./.github/CONTRIBUTING.md).
 
