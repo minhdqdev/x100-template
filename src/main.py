@@ -1,4 +1,5 @@
 import os
+import argparse
 import shutil
 import sys
 import subprocess
@@ -600,6 +601,22 @@ def exit_app() -> None:
     sys.exit(0)
 
 
+def run_contribute() -> None:
+    """Run the contribute flow via the shell script."""
+    script_path = os.path.join(TOOL_ROOT, "scripts", "contribute.sh")
+    if not os.path.exists(script_path):
+        print(f"{RED}ERROR{RESET} contribute script not found: {script_path}")
+        sys.exit(1)
+    try:
+        # Invoke with bash to be cross-platform where bash is available
+        result = subprocess.run(["bash", script_path])
+        if result.returncode != 0:
+            sys.exit(result.returncode)
+    except FileNotFoundError:
+        print(f"{RED}ERROR{RESET} 'bash' not found on PATH. Install bash to run contribute.")
+        sys.exit(127)
+
+
 def menu_loop(options: List[str], actions: List[Callable[[], None]]) -> None:
     assert len(options) == len(actions)
     selected = 0
@@ -626,14 +643,41 @@ def menu_loop(options: List[str], actions: List[Callable[[], None]]) -> None:
             exit_app()
 
 
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="x100", add_help=True)
+    sub = parser.add_subparsers(dest="command")
+
+    # init
+    sub.add_parser("init", help="Initialize project structure")
+    sub.add_parser("initialize", help="Alias of init")
+    sub.add_parser("init-project", help="Alias of init")
+
+    # contribute
+    sub.add_parser("contribute", help="Sync and open a PR with changes")
+
+    # verify (optional convenience)
+    sub.add_parser("verify", help="Run environment checks")
+
+    return parser
+
+
 def main() -> None:
-    # Subcommand support: `x100 init` jumps straight to Init project
-    if len(sys.argv) > 1:
-        cmd = sys.argv[1].lower()
-        if cmd in ("init", "initialize", "init-project"):
-            clear_screen()
-            init_project(wait_for_key=False)
-            return
+    parser = build_parser()
+    args, extra = parser.parse_known_args()
+
+    if args.command in ("init", "initialize", "init-project"):
+        clear_screen()
+        init_project(wait_for_key=False)
+        return
+    if args.command == "contribute":
+        clear_screen()
+        run_contribute()
+        return
+    if args.command == "verify":
+        clear_screen()
+        verify()
+        return
+
     options = [
         "Init project",
         "Setup VSCode",
