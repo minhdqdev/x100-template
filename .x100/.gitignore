@@ -1,0 +1,28 @@
+# By default, Claude Code generally respects .gitignore rules
+# for operations like Read() and Edit()
+
+# Environment variables
+**/*.env
+
+# Python venv
+**/.venv/
+
+# Claude Code settings
+.claude/settings.json
+
+
+
+**/.vscode/**
+!**/.vscode/settings.example.json
+
+
+# macOS
+.DS_Store
+
+docs/
+
+
+tags
+
+
+config.json
