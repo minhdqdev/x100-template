@@ -30,6 +30,8 @@ trap 'rm -rf "$TMPDIR"' EXIT
 
 echo "→ Cloning $TEMPLATE_REPO ..."
 gh repo clone "$TEMPLATE_REPO" "$TMPDIR/x100-template" >/dev/null
+echo "→ Cloning $TEMPLATE_REPO ..."
+gh repo clone "$TEMPLATE_REPO" "$TMPDIR/x100-template" >/dev/null
 cd "$TMPDIR/x100-template"
 
 # Choose base branch (prefer 'develop')
@@ -86,10 +88,12 @@ PR_FLAGS=()
 [[ "${X100_DRAFT:-0}" == "1" ]] && PR_FLAGS+=(--draft)
 
 echo "→ Creating PR to $BASE_BRANCH ..."
+echo "→ Creating PR to $BASE_BRANCH ..."
 if gh pr create -B "$BASE_BRANCH" -t "$TITLE" -b "$BODY" "${PR_FLAGS[@]}" >/dev/null; then
   gh pr view --json url -q .url || true
   echo "✓ PR created."
 else
   echo "⚠️ Could not auto-create PR. Open manually:"
+  echo "   https://github.com/$TEMPLATE_REPO/compare/$BASE_BRANCH...$BRANCH"
   echo "   https://github.com/$TEMPLATE_REPO/compare/$BASE_BRANCH...$BRANCH"
 fi
