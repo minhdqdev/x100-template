@@ -14,6 +14,9 @@ This document helps solutions architects and developers understand the system's 
     git submodule update --init --recursive
     ```
 
+- Backend and frontend should be in separate repositories for better separation of concerns and independent deployment cycles.
+    - Backend: placed in `submodules/backend/` directory.
+    - Frontend: placed in `submodules/frontend/` directory.
 
 ## 3. Design Decisions
 Backend:
@@ -36,29 +39,30 @@ Deployment:
 Example project structure:
 ```
 .
-├── backend/
-│   ├── .git
-│   ├── deploys/
-│   │   ├── docker-compose.yml
-│   │   └── Dockerfile
-│   ├── app
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/
-│   ├── .git
-│   ├── deploys/
-│   │   ├── docker-compose.yml
-│   │   └── Dockerfile
-│   ├── src
-│   ├── package.json
-│   └── Dockerfile
+├── submodules
+│   ├── backend
+│   │   ├── app
+│   │   ├── tests
+│   │   ├── deploy/
+│   │   │   ├── Dockerfile
+│   │   │   └── docker-compose.yml
+│   │   ├── pyproject.toml
+│   │   └── ...
+│   └── frontend
+│       ├── pages
+│       ├── components
+│       ├── public
+│       ├── deploy/
+│       │   ├── Dockerfile
+│       │   └── docker-compose.yml
+│       ├── package.json
+│       └── ...
 ```
-
-
 
 ## 4. API Design
 - Prefer OpenAPI Specification (OAS) for API documentation.
 - Use API versioning to manage changes.
+    - E.g., `/api/v1/resource`, `/api/v2/resource`.
 - Include examples and descriptions for all endpoints.
 - Prefer REST API principles (statelessness, resource-based URLs, etc.).
 - Prefer HTTP error codes rather than custom error codes.
