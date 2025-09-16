@@ -1,20 +1,24 @@
-# Sample AGENTS.md file
+# AI Agent Environment Guide
 
-## Dev environment tips
-- Use `pnpm dlx turbo run where <project_name>` to jump to a package instead of scanning with `ls`.
-- Run `pnpm install --filter <project_name>` to add the package to your workspace so Vite, ESLint, and TypeScript can see it.
-- Use `pnpm create vite@latest <project_name> -- --template react-ts` to spin up a new React + Vite package with TypeScript checks ready.
-- Check the name field inside each package's package.json to confirm the right name—skip the top-level one.
+## Project Snapshot
+- **Name:** [PROJECT_NAME]
+- **Stack:** [TECH_STACK]
+- **Key docs:** `README.md`, `docs/PRD.md`, `docs/PRODUCT_BACKLOG.md`, `docs/user-stories/`, `.x100/resources/references/TECHNICAL_GUIDELINE.md`
 
-## Testing instructions
-- Find the CI plan in the .github/workflows folder.
-- Run `pnpm turbo run test --filter <project_name>` to run every check defined for that package.
-- From the package root you can just call `pnpm test`. The commit should pass all tests before you merge.
-- To focus on one step, add the Vitest pattern: `pnpm vitest run -t "<test name>"`.
-- Fix any test or type errors until the whole suite is green.
-- After moving files or changing imports, run `pnpm lint --filter <project_name>` to be sure ESLint and TypeScript rules still pass.
-- Add or update tests for the code you change, even if nobody asked.
+### Shared Tooling
+- Docker compose services under `submodules/*/deploys/`
+- Always ensure docs/ artifacts stay consistent (PRD → Backlog → Stories)
 
-## PR instructions
-- Title format: [<project_name>] <Title>
-- Always run `pnpm lint` and `pnpm test` before committing.
+## Workflow for Agents
+
+### Executing project tasks
+1. **Understand context**
+   Read PRD, Technical Guideline, relevant docs, and codebase.
+3. **Plan output**
+   For code, outline steps vs. acceptance criteria. For docs, adhere to templates in `.x100/resources/doc-templates/`.
+4. **Execute**  
+   Update relevant files; keep feedback loop short—commit small, complete units.
+5. **Validate**  
+   Run lint/test commands for touched areas. Update docs & telemetry checklists when needed.
+6. **Document**  
+   Update `docs/CHANGELOG.md`, `docs/PRODUCT_BACKLOG.md` and relevant docs.

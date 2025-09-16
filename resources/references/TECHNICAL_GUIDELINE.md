@@ -1,85 +1,86 @@
 # Technical Guideline
 
-## 1. Introduction
-This document helps solutions architects and developers understand the system's design and make informed decisions during implementation. Unless there are reasons to deviate, the guidelines in this document should be followed.
+## 1. Purpose
+This guideline helps SA and DEV choose consistent defaults for software product. Unless a documented exception exists, follow these recommendations to achieve maintainable systems and predictable operations. Record any deviation in an ADR that explains the trade-offs and approval.
 
-## 2. Architecture Overview
-- Prefer simple architectures (monolithic, SOA) rather than complex architectures (microservices, event-driven).
+## 2. Architectural Principles
+- Start simple: favour modular monolith or service-oriented designs before introducing microservices or event-driven architecture.
+- Make domain boundaries explicit through well-defined modules, APIs, and shared contracts.
+- Prefer convention over configuration: adopt mature frameworks and tooling rather than bespoke glue code.
+- Automate from the outset: tests, packaging, deployment, and quality checks run in CI/CD for every change.
+- Keep documentation and diagrams versioned with the codebase; update them as part of feature work.
 
+## 3. Codebase Management
+### 3.1 Repository layout
+- Default: manage backend and frontend as Git submodules under `submodules/backend/` and `submodules/frontend/` to allow independent release cadences while keeping the integration repo slim.
+- Alternative: a monorepo is acceptable when both stacks share release cadence and tooling; document the rationale in an ADR and ensure build pipelines remain isolated per component.
+- Avoid mixing unrelated prototypes or throwaway code inside production repositories.
 
-## Code base management
-- Prefer Git submodules for multi-repo management:
-    ```bash
-    git submodule add <repository-url>
-    git submodule update --init --recursive
-    ```
+### 3.2 Collaboration practices
+- Use trunk-based development or short-lived feature branches with mandatory reviews and automated checks.
+- Run the full test suite and static analysis in CI for every merge request across all submodules.
+- Tag releases and maintain change logs so operational teams can trace deployments back to commits.
 
+## 4. Default Technology Stack
+### 4.1 Backend
+- Language: Python 3.12+ is the default because of the team skillset, ecosystem maturity, and excellent Django support.
+- Framework: Django is preferred for its batteries-included ORM, admin, and security hardening. Consider FastAPI only for lightweight APIs that do not need Django’s features.
+- Dependency management: use `uv` to guarantee reproducible lock files, deterministic builds, and rapid installs.
+- Application server: run behind `uvicorn` for ASGI support and async capabilities. Reserve alternatives (e.g., Gunicorn, Hypercorn) for platform constraints that block `uvicorn`.
+- Data access: use Django’s ORM with repository abstractions when cross-service reuse is required.
+- Observability: ship structured logs (JSON), capture OpenTelemetry traces, and expose Prometheus metrics by default.
 
-## 3. Design Decisions
-Backend:
-- Prefer Python for backend than Node.js, Java, etc.
-- Prefer Django than Flask, FastAPI, etc.
-- Prefer uvicorn than other ASGI servers (e.g., Daphne, Hypercorn, etc.).
-- Prefer `uv` for package management than `pip`.
-- Prefer PostgreSQL than MySQL, SQLite, etc.
-- Prefer Redis than Memcached, etc.
+### 4.2 Frontend
+- Framework: Next.js with React 18+ and TypeScript provides server-side rendering, routing, and strong DX.
+- Styling: use a design system or component library agreed by the product team; document deviations.
+- Testing: add unit tests (Vitest/Jest), integration tests (Playwright/Cypress), and linting (ESLint) to CI.
 
-Frontend:
-- Prefer Next.js than other React frameworks (e.g., Create React App, Gatsby, etc.).
+### 4.3 Data stores and messaging
+- Primary datastore: PostgreSQL is the standard for relational workloads because of reliability, migrations, and first-class Django support. Choose managed instances (e.g., RDS) whenever possible.
+- Secondary stores: introduce MySQL or other relational databases only when a hosting constraint prevents PostgreSQL.
+- NoSQL: adopt MongoDB or DynamoDB for document/large-scale workloads with clearly justified access patterns. Document read/write volume, consistency requirements, and retention policy before adoption.
+- Caching & queues: Redis is the default cache and message broker. Use Celery or RQ for background jobs; consider cloud-native alternatives (SQS, Pub/Sub) only when integrating with cloud-managed ecosystems.
 
+### 4.4 Infrastructure
+- Containerisation: package services with Docker. Provide reproducible `Dockerfile`s checked into each submodule.
+- Orchestration: use Docker Compose for local development and integration testing. Move to Kubernetes or managed container services when scale, resilience, or multi-service deployments require it; capture the transition in an ADR.
 
-Deployment:
-- Prefer Docker for containerization than other solutions (e.g., Vagrant, manual setup, etc.).
-- Prefer docker compose than other orchestration tools (e.g., Kubernetes, Swarm, etc.).
+## 5. API Design
+- Document every external API with OpenAPI 3.x and publish generated docs alongside the service.
+- Version APIs explicitly (`/api/v1/...`) and deprecate old versions with clear timelines.
+- Follow REST conventions: nouns in URLs, appropriate HTTP verbs, HATEOAS when helpful.
+- Standardise error responses with machine-readable codes, human-readable messages, and trace IDs.
+- Provide pagination, filtering, and sorting for collection endpoints. Define rate limits and idempotency expectations.
+- Include example requests/responses and authentication expectations in the OpenAPI spec.
 
+## 6. Data Management
+- Manage schema changes with migrations committed to source control; one migration per logical change.
+- Apply retention policies, archival plans, and GDPR-compliant deletion workflows.
+- Encrypt sensitive data at rest and in transit. Use application-level encryption for fields that require it.
+- Establish backup schedules, test restores quarterly, and document RPO/RTO targets.
 
-Example project structure:
-```
-.
-├── backend/
-│   ├── .git
-│   ├── deploys/
-│   │   ├── docker-compose.yml
-│   │   └── Dockerfile
-│   ├── app
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/
-│   ├── .git
-│   ├── deploys/
-│   │   ├── docker-compose.yml
-│   │   └── Dockerfile
-│   ├── src
-│   ├── package.json
-│   └── Dockerfile
-```
+## 7. Security
+- Enforce HTTPS everywhere; redirect HTTP to HTTPS automatically.
+- Authenticate APIs with bearer tokens (JWT or opaque tokens) and authorise with least-privilege roles.
+- Store credentials and secrets in a dedicated secret manager (e.g., Vault, AWS Secrets Manager); never commit them to git.
+- Run SAST, dependency vulnerability scanning, and container image scanning in CI.
+- Apply secure coding guidelines (OWASP ASVS) and threat-model significant features. Document mitigations.
 
+## 8. Performance & Resilience
+- Implement caching strategies (Redis, CDN) for frequent reads, with explicit cache invalidation rules.
+- Offload long-running work to asynchronous workers or event-driven pipelines.
+- Define performance budgets and SLIs/SLOs; test them via load/chaos testing prior to launch.
+- Instrument code with metrics, traces, and logs; aggregate them in a central observability stack.
+- Use circuit breakers, retries with exponential backoff, and timeouts when calling external services.
 
+## 9. Deployment & Operations
+- Build immutable images with Docker; pin versions of base images and dependencies.
+- Use GitHub Actions or GitLab CI/CD pipelines for automated builds, tests, security scans, and deployments.
+- Roll out changes with canary or blue/green deployments when production impact is high; otherwise use rolling updates.
+- Manage configuration via environment variables injected at deploy time; keep environment parity across dev/staging/prod.
+- Maintain runbooks, incident response checklists, and rollback procedures stored alongside the service.
 
-## 4. API Design
-- Prefer OpenAPI Specification (OAS) for API documentation.
-- Use API versioning to manage changes.
-- Include examples and descriptions for all endpoints.
-- Prefer REST API principles (statelessness, resource-based URLs, etc.).
-- Prefer HTTP error codes rather than custom error codes.
-
-## 5. Database Design
-- Prefer relational databases (PostgreSQL, MySQL) for structured data.
-- Prefer NoSQL databases (MongoDB, DynamoDB) for unstructured data.
-
-
-## 6. Security Considerations
-- Prefer bearer token authentication for APIs.
-- Prefer HTTPS for all communications between clients and servers.
-- Prefer input validation and sanitization to prevent injection attacks.
-- Prefer using established libraries and frameworks for security features.
-
-## 7. Performance Considerations
-- Prefer caching strategies (e.g., Redis, Memcached) to improve response times.
-- Prefer asynchronous processing (e.g., Celery, RabbitMQ) for long-running tasks.
-
-## 8. Deployment Strategy
-- Prefer canary deployments for rolling out changes.
-- Prefer deployment automation (e.g., GitHub Actions, GitLab CI/CD) for consistent and repeatable deployments.
-
-
+## 10. Governance and Decision Records
+- Capture architectural decisions in ADRs within `docs/adrs/`; link them from relevant sections of this guideline.
+- Review this guideline quarterly to ensure technology choices remain current.
+- Provide onboarding notes and diagrams (`docs/diagrams/`, `docs/data/`) that reflect the latest state before major releases.
