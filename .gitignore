@@ -6,6 +6,9 @@
 
 # Python venv
 **/.venv/
+**/__pycache__/
+**/*.pyc
+
 
 # Claude Code settings
 .claude/settings.json
