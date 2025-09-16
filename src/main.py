@@ -1,9 +1,9 @@
-import os
 import argparse
-import shutil
-import sys
-import subprocess
 import json
+import os
+import shutil
+import subprocess
+import sys
 from typing import Callable, List
 
 TITLE = """
@@ -417,9 +417,7 @@ def verify() -> None:
     if all_ok:
         print(f"{GREEN}All checks passed.{RESET}")
     else:
-        print(
-            f"{YELLOW}Some checks failed. Please review the output above.{RESET}"
-        )
+        print(f"{YELLOW}Some checks failed. Please review the output above.{RESET}")
     input("Press Enter to return to menu…")
 
 
@@ -431,7 +429,7 @@ def init_project(wait_for_key: bool = True) -> None:
     print(f"{BOLD}Initializing Project Structure{RESET}\n")
 
     # Ensure directories
-    for dname in ["submodules", "docs"]:
+    for dname in ["submodules", "docs", "tests", "scripts"]:
         path = os.path.join(outer_dir, dname)
         if not os.path.isdir(path):
             os.makedirs(path, exist_ok=True)
@@ -500,8 +498,10 @@ def init_project(wait_for_key: bool = True) -> None:
 
     # project_code
     if not config.get("project_code"):
+
         def _code_validator(x: str) -> bool:
             return len(x) > 0 and all(c.isalnum() or c in ("-", "_") for c in x)
+
         base = str(config.get("project_name", os.path.basename(outer_dir)))
         code_default = base.lower().replace(" ", "-")
         config["project_code"] = prompt_text(
@@ -584,7 +584,7 @@ exec "$(dirname "$0")/.x100/x100" "$@"
         cmd_path = os.path.join(outer_dir, "x100.cmd")
         if not os.path.exists(cmd_path):
             try:
-                cmd_content = "@echo off\r\n\"%~dp0\\.x100\\x100.cmd\" %*\r\n"
+                cmd_content = '@echo off\r\n"%~dp0\\.x100\\x100.cmd" %*\r\n'
                 create_wrapper_script(cmd_path, cmd_content)
                 print(f"{GREEN}CREATED{RESET}  {cmd_path}")
             except Exception as e:
@@ -597,7 +597,6 @@ exec "$(dirname "$0")/.x100/x100" "$@"
 
 def exit_app() -> None:
     clear_screen()
-    # print("Goodbye! 👋")
     sys.exit(0)
 
 

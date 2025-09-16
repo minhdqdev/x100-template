@@ -9,22 +9,21 @@ As a Solutions Architect, use this checklist to ensure the PRD and related docum
 Use `.x100/doc-templates/ADR.md` as a template.
 
 ## Architecture (diagrams in Mermaid blocks)
-- [ ] /docs/diagrams/context.md — C4 L1 (system context)
-- [ ] /docs/diagrams/containers.md — C4 L2 (containers + responsibilities)
-- [ ] /docs/diagrams/sequence-happy.md — main happy path
-- [ ] /docs/diagrams/sequence-failure.md — critical failure path
+- [ ] /docs/high-level-architecture.md — system context, key components, data flow
+- [ ] /docs/diagrams/sequence-diagrams.md — key user/system interactions
 
 ## Data
 - [ ] /docs/data/erd.md — core entities & relationships
-- [ ] /docs/data/classification.md — PII/sensitive classes; masking/retention
 
 ## Interfaces (Markdown summaries that link to specs)
 - [ ] /docs/api/api-contracts.md — endpoints, auth, error model, link to OpenAPI
 - [ ] /docs/api/event-contracts.md — topics, schemas, ordering/idempotency, link to AsyncAPI
 
-## Ops & Quality
-- [ ] /docs/ops/slos.md — SLO/SLI targets (latency, availability, errors)
-- [ ] /docs/ops/alerts.md — alert rules & paging policy
-- [ ] /docs/ops/runbooks.md — incident & rollback runbooks
-- [ ] /docs/ops/rollout.md — release strategy (canary/blue-green) + exact rollback steps
+## Quality
 - [ ] /docs/testing/test-plan.md — unit/contract/e2e/perf/security scope
+
+## Ops
+- [ ] /docs/ops/observability.md — logging, metrics, tracing, dashboards, alerts
+- [ ] /docs/ops/deployment.md — CI/CD, environments, rollback, feature flags
+
+
