@@ -1,5 +1,5 @@
 ---
-description: Generate design artifacts
+description: Use this prompt to generate design artifacts
 ---
 
 Stop if one of the following files are missing:
