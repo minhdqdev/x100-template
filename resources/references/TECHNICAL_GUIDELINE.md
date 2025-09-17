@@ -21,13 +21,47 @@ This guideline helps SA and DEV choose consistent defaults for software product.
 - Run the full test suite and static analysis in CI for every merge request across all submodules.
 - Tag releases and maintain change logs so operational teams can trace deployments back to commits.
 
+### 3.3. Dependency management
+#### Django/Python
+- Use `uv` to manage dependencies and generate lock files (`uv lock`).
+
+
+### 3.4. Package management
+#### Django/Python
+- Django app should be named `core` to avoid conflicts with third-party packages. Avoid creating multiple Django apps unless there is a clear modularity or reuse benefit.
+- Every module should have docstrings and type annotations (PEP 484).
+- Follow PEP 8 for code style; use `black` for formatting and `flake8` for linting.
+- Group related functionality into submodules under `core/`, e.g., `core/models/`, `core/views/`, `core/services/`, `core/utils/`.
+- Each submodule should have an `__init__.py` file to mark it as a package.
+- Models should be defined in `core/models.py` or `core/models/` if complex.
+- Views should be in `core/views.py` or `core/views/` if complex.
+- Serializers should be in `core/serializers.py` or `core/serializers/` if complex.
+- Utility functions should be in `core/utils.py` or `core/utils/` if complex.
+- Avoid deeply nested packages; flatten the structure when possible to reduce import complexity.
+- Use relative imports for intra-package references and absolute imports for external packages.
+- Service modules should be put under `core/services/` with a `__init__.py` file to mark it as a package. `services/__init__.py` should import submodules to expose a clean public API, for example:
+
+```python
+from .brew_service import BrewService
+from .digest_service import DigestService
+
+__all__ = [
+    "BrewService",
+    "DigestService",
+]
+```
+
 ## 4. Default Technology Stack
 ### 4.1 Backend
 - Language: Python 3.12+ is the default because of the team skillset, ecosystem maturity, and excellent Django support.
 - Framework: Django is preferred for its batteries-included ORM, admin, and security hardening. Consider FastAPI only for lightweight APIs that do not need Django’s features.
 - Dependency management: use `uv` to guarantee reproducible lock files, deterministic builds, and rapid installs.
 - Application server: run behind `uvicorn` for ASGI support and async capabilities. Reserve alternatives (e.g., Gunicorn, Hypercorn) for platform constraints that block `uvicorn`.
-- Data access: use Django’s ORM with repository abstractions when cross-service reuse is required.
+- Caching: use Redis for in-memory caching and rate limiting.
+- Task queue: use Celery with Redis as the broker for background jobs.
+- Messaging: use RabbitMQ or Redis streams for inter-service communication when needed. For complicated workflows, consider Apache Kafka.
+- Testing: write unit tests with `pytest` and `pytest-django`, use `factory_boy` for test data, and run integration tests with `pytest` or `requests`. Include linting (flake8, black) and type checking (mypy) in CI.
+- Data access: use Django’s ORM with repository abstractions when cross-service reuse is required. Only use raw SQL when justified by performance or complex queries.
 - Observability: ship structured logs (JSON), capture OpenTelemetry traces, and expose Prometheus metrics by default.
 
 ### 4.2 Frontend
@@ -54,6 +88,7 @@ This guideline helps SA and DEV choose consistent defaults for software product.
 - Include example requests/responses and authentication expectations in the OpenAPI spec.
 
 ## 6. Data Management
+- Table names should be singular and lowercase with underscores (e.g., `user_profile`).
 - Manage schema changes with migrations committed to source control; one migration per logical change.
 - Apply retention policies, archival plans, and GDPR-compliant deletion workflows.
 - Encrypt sensitive data at rest and in transit. Use application-level encryption for fields that require it.

@@ -18,12 +18,13 @@ Use this workflow for coding, bug fixes, and documentation tasks.
    Read PRD, Technical Guideline, relevant docs, and codebase.
 3. **Plan output**
    For code, outline steps vs. acceptance criteria. For docs, adhere to templates in `.x100/resources/doc-templates/`.
-4. **Execute**  
+4. **Execute**
    Update relevant files; keep feedback loop short—commit small, complete units.
-5. **Validate**  
+5. **Validate**
    Run lint/test commands for touched areas. Update docs & telemetry checklists when needed.
-6. **Document**  
-   Update `docs/CHANGELOG.md`, `docs/PRODUCT_BACKLOG.md` and relevant docs.
+6. **Document**
+   Update comments section in user story file to brief what was done technically.
+   Update `docs/CHANGELOG.md`, `docs/PRODUCT_BACKLOG.md`
 
 
 ### Test
