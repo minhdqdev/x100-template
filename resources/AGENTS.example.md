@@ -28,7 +28,7 @@ Use this workflow for coding, bug fixes, and documentation tasks.
 
 
 ### Test
-Use this workflow for testing tasks.
+Use this workflow only when user requests testing.
 
 1. **Understand context**
    Read PRD, Technical Guideline, relevant docs, and codebase.

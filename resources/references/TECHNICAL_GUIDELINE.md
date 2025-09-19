@@ -39,6 +39,7 @@ This guideline helps SA and DEV choose consistent defaults for software product.
 - Utility functions should be in `core/utils.py` or `core/utils/` if complex.
 - Avoid deeply nested packages; flatten the structure when possible to reduce import complexity.
 - Use relative imports for intra-package references and absolute imports for external packages.
+- Service modules should include header docstrings explaining their purpose and usage.
 - Service modules should be put under `core/services/` with a `__init__.py` file to mark it as a package. `services/__init__.py` should import submodules to expose a clean public API, for example:
 
 ```python
@@ -64,10 +65,14 @@ __all__ = [
 - Data access: use Django’s ORM with repository abstractions when cross-service reuse is required. Only use raw SQL when justified by performance or complex queries.
 - Observability: ship structured logs (JSON), capture OpenTelemetry traces, and expose Prometheus metrics by default.
 
+Refer to the `./DJANGO.md` file for best practices specific to Django projects.
+
 ### 4.2 Frontend
 - Framework: Next.js with React 18+ and TypeScript provides server-side rendering, routing, and strong DX.
 - Styling: use a design system or component library agreed by the product team; document deviations.
 - Testing: add unit tests (Vitest/Jest), integration tests (Playwright/Cypress), and linting (ESLint) to CI.
+
+Refer to the `./NEXTJS.md` file for best practices specific to Next.js projects.
 
 ### 4.3 Data stores and messaging
 - Primary datastore: PostgreSQL is the standard for relational workloads because of reliability, migrations, and first-class Django support. Choose managed instances (e.g., RDS) whenever possible.
@@ -93,6 +98,12 @@ __all__ = [
 - Apply retention policies, archival plans, and GDPR-compliant deletion workflows.
 - Encrypt sensitive data at rest and in transit. Use application-level encryption for fields that require it.
 - Establish backup schedules, test restores quarterly, and document RPO/RTO targets.
+
+## Testing
+- Write unit tests for all business logic, aiming for >80% coverage.
+- Use integration tests to cover critical workflows and edge cases.
+- Run tests in isolated environments with a fresh database state for each run.
+- Use `pyproject.toml` as the single configuration file for `pytest` other than the old `pytest.ini`.
 
 ## 7. Security
 - Enforce HTTPS everywhere; redirect HTTP to HTTPS automatically.
