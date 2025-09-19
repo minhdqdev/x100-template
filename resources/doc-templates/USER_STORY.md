@@ -1,30 +1,30 @@
-Title: <concise outcome>
+**Title:** <concise outcome>
 
 As a <persona/role>,
 I want <capability>,
 so that <business value/benefit>.
 
-Context
+**Context**
 - Problem / motivation:
 - Key users / personas:
 - Assumptions / out of scope:
 
-Acceptance Criteria (testable)
+**Acceptance Criteria (testable)**
 - [Given ... When ... Then ...]
 - [Given ... When ... Then ...]
 - Edge cases: <list>
 
-Non-Functional / Constraints
+**Non-Functional / Constraints:**
 - Performance: <e.g., P95 < 300ms>
 - Security/Privacy: <e.g., PII masked, GDPR>
 - Accessibility: <e.g., WCAG 2.1 AA>
 - Reliability: <e.g., 99.9% monthly>
 - Compliance/Localization: <if applicable>
 
-Dependencies
+**Dependencies:**
 - <systems, teams, feature flags, data>
 
-Tasks:
+**Tasks:**
 - [ ] T0001 - Spike: clarify unknowns / update AC (Owner: <name>, Effort: S)
 - [ ] T0002 - API contract drafted and reviewed (Type: BE, Link: <spec>)
 - [ ] T0003 - Backend: implement endpoint <verb> /v1/<resource> (Type: BE, Effort: M)
@@ -38,7 +38,7 @@ Tasks:
 - [ ] T0011 - Launch: feature flag rollout plan + toggle default (Type: Ops/PM)
 - [ ] T0012 - Post-release checks: logs, metrics, bug triage (Type: PM/Eng)
 
-Tracking
+**Tracking:**
 - Priority: <Must/Should/Could> or <P1–P4>
 - Story points / size: <n>
 - Epic / link: <id>
@@ -49,3 +49,5 @@ Tracking
   - [ ] Security/privacy checks complete
   - [ ] Monitoring/alerts in place; dashboards updated
   - [ ] Docs/help & analytics updated
+
+**Comments:**

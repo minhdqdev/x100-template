@@ -10,3 +10,5 @@ Stop if one of the following files are missing:
 Read those files and `.x100/resources/references/SA_CHECKLIST.md` to understand what design artifacts are needed.
 
 Generate the design artifacts if they do not already exist.
+
+Record this change to `docs/CHANGELOG.md`.

@@ -13,3 +13,5 @@ Read those files to understand the idea and technical guidelines before writing 
 Use `.x100/resources/doc-templates/PRD.md` as a template.
 
 Generate `docs/PRD.md` if it does not already exist.
+
+Suggest improvements to the PRD.
