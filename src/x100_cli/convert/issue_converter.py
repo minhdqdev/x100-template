@@ -4,6 +4,8 @@ import json
 import re
 import subprocess
 import tempfile
+import logging
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import List, Tuple, Optional
 from dataclasses import dataclass
@@ -18,6 +20,40 @@ from ..core import AGENT_CONFIG, load_config
 
 
 console = Console()
+
+
+def setup_convert_logger(log_dir: Path) -> logging.Logger:
+    """
+    Set up a rotating file logger for convert operations.
+
+    Args:
+        log_dir: Directory to store log files
+
+    Returns:
+        Configured logger instance
+    """
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / "convert.log"
+
+    logger = logging.getLogger("x100.convert")
+    logger.setLevel(logging.DEBUG)
+
+    # Remove existing handlers
+    logger.handlers.clear()
+
+    # Rotating file handler: max 10MB per file, keep 5 backup files
+    handler = RotatingFileHandler(
+        log_file, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"  # 10 MB
+    )
+
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    return logger
 
 
 @dataclass
@@ -36,12 +72,15 @@ class IssueConverter:
 
     US_PATTERN = re.compile(r"^US-\d+-[a-zA-Z0-9\-]+\.md$")
 
-    def __init__(self, agent_name: Optional[str] = None):
+    def __init__(
+        self, agent_name: Optional[str] = None, log_dir: Optional[Path] = None
+    ):
         """
         Initialize the converter.
 
         Args:
             agent_name: Name of AI agent to use. If None, uses default from config.
+            log_dir: Directory for log files. If None, uses .x100/logs/
         """
         self.agent_name = agent_name or self._get_default_agent()
         self.agent_config = AGENT_CONFIG.get(self.agent_name)
@@ -52,13 +91,21 @@ class IssueConverter:
         # Map agent names to their CLI commands (some differ from agent key)
         self.cli_command = self._get_cli_command()
 
+        # Set up logging
+        if log_dir is None:
+            log_dir = Path.cwd() / ".x100" / "logs"
+        self.logger = setup_convert_logger(log_dir)
+        self.logger.info(f"Initialized IssueConverter with agent: {self.agent_name}")
+
         # Verify agent CLI is available
         if not self._check_agent_cli():
             install_url = self.agent_config.get("install_url")
-            raise RuntimeError(
+            error_msg = (
                 f"{self.agent_config['name']} CLI not found. "
                 f"Install from: {install_url if install_url else 'check agent documentation'}"
             )
+            self.logger.error(error_msg)
+            raise RuntimeError(error_msg)
 
     def _get_cli_command(self) -> str:
         """Get the CLI command for the agent."""
@@ -156,6 +203,11 @@ class IssueConverter:
         if not us_files:
             return False, {}, "No files to convert"
 
+        file_names = [f.name for f in us_files]
+        self.logger.info(
+            f"Starting batch conversion for {len(us_files)} files: {file_names}"
+        )
+
         # Build combined prompt with all user stories
         prompt_parts = [get_schema_prompt()]
         prompt_parts.append(
@@ -189,7 +241,7 @@ class IssueConverter:
         try:
             result = None
             timeout_seconds = 600  # 10 minutes timeout for batch processing
-            
+
             if self.agent_name == "copilot":
                 result = subprocess.run(
                     [self.cli_command, "--prompt", prompt, "--allow-all-tools"],
@@ -240,55 +292,83 @@ class IssueConverter:
                 error_msg = (
                     result.stderr.strip() or result.stdout.strip() or "Unknown error"
                 )
+                self.logger.error(
+                    f"AI conversion failed with return code {result.returncode}"
+                )
+                self.logger.error(f"Error output: {error_msg}")
                 return False, {}, f"AI conversion failed: {error_msg}"
 
             # Extract and parse JSON response
             response_text = result.stdout.strip()
+            self.logger.debug(f"AI response length: {len(response_text)} characters")
+            self.logger.debug(f"AI response (first 500 chars): {response_text[:500]}")
+
             json_text = self._extract_json_from_response(response_text)
+            self.logger.debug(f"Extracted JSON length: {len(json_text)} characters")
+            self.logger.debug(f"Extracted JSON (first 1000 chars): {json_text[:1000]}")
 
             try:
                 all_issues = json.loads(json_text)
+                self.logger.info(
+                    f"Successfully parsed JSON with {len(all_issues)} issues"
+                )
 
                 # Validate it's a dictionary
                 if not isinstance(all_issues, dict):
-                    return (
-                        False,
-                        {},
-                        "AI response is not a JSON object with filename keys",
-                    )
+                    error_msg = "AI response is not a JSON object with filename keys"
+                    self.logger.error(error_msg)
+                    self.logger.error(f"Received type: {type(all_issues)}")
+                    return False, {}, error_msg
 
                 # Validate each issue has required fields
                 for filename, issue_data in all_issues.items():
                     if not isinstance(issue_data, dict):
-                        return (
-                            False,
-                            {},
-                            f"Issue data for {filename} is not a JSON object",
+                        error_msg = f"Issue data for {filename} is not a JSON object"
+                        self.logger.error(error_msg)
+                        self.logger.error(
+                            f"Data type: {type(issue_data)}, Data: {issue_data}"
                         )
+                        return False, {}, error_msg
                     if "title" not in issue_data or "body" not in issue_data:
-                        return (
-                            False,
-                            {},
-                            f"Issue for {filename} missing required fields (title, body)",
+                        error_msg = f"Issue for {filename} missing required fields (title, body)"
+                        self.logger.error(error_msg)
+                        self.logger.error(
+                            f"Available fields: {list(issue_data.keys())}"
                         )
+                        self.logger.error(
+                            f"Issue data: {json.dumps(issue_data, indent=2)}"
+                        )
+                        return False, {}, error_msg
 
                 # Write individual JSON files for compatibility
                 for us_file in us_files:
                     file_stem = us_file.stem
                     if file_stem in all_issues:
                         json_file = temp_dir / f"{file_stem}.json"
-                        json_file.write_text(
-                            json.dumps(all_issues[file_stem], indent=2),
-                            encoding="utf-8",
+                        json_content = json.dumps(all_issues[file_stem], indent=2)
+                        json_file.write_text(json_content, encoding="utf-8")
+                        self.logger.debug(
+                            f"Wrote JSON for {file_stem}: {json_content[:200]}..."
                         )
 
+                self.logger.info(
+                    f"Batch conversion successful for {len(all_issues)} files"
+                )
                 return True, all_issues, None
 
             except json.JSONDecodeError as e:
-                return False, {}, f"Invalid JSON in AI response: {e}"
+                error_msg = f"Invalid JSON in AI response: {e}"
+                self.logger.error(error_msg)
+                self.logger.error(f"Failed to parse JSON at position {e.pos}")
+                self.logger.error(
+                    f"JSON text around error: {json_text[max(0, e.pos-100):e.pos+100]}"
+                )
+                return False, {}, error_msg
 
         except subprocess.TimeoutExpired:
-            return False, {}, "AI conversion timed out (600s)"
+            error_msg = "AI conversion timed out (600s)"
+            self.logger.error(error_msg)
+            return False, {}, error_msg
         except Exception as e:
             return False, {}, f"Unexpected error: {e}"
 
@@ -456,6 +536,13 @@ Convert this user story to a JSON object following the schema above.
             Tuple of (success, issue_url, error_message)
         """
         try:
+            self.logger.info(f"Creating GitHub issue: {issue_data.title[:50]}...")
+            self.logger.debug(
+                f"Issue data: title={issue_data.title}, labels={issue_data.labels}, "
+                f"assignees={issue_data.assignees}, milestone={issue_data.milestone}, "
+                f"project_id={project_id}, repo={repo}"
+            )
+
             # Build gh issue create command
             cmd = ["gh", "issue", "create"]
 
@@ -473,6 +560,10 @@ Convert this user story to a JSON object following the schema above.
             if issue_data.milestone:
                 cmd.extend(["--milestone", str(issue_data.milestone)])
 
+            self.logger.debug(
+                f"Running command: {' '.join(cmd[:5])}... (body truncated)"
+            )
+
             # Create the issue without labels first
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
@@ -480,25 +571,41 @@ Convert this user story to a JSON object following the schema above.
                 error_msg = (
                     result.stderr.strip() or result.stdout.strip() or "Unknown error"
                 )
+                self.logger.error(f"Failed to create issue: {error_msg}")
+                self.logger.error(f"Command stdout: {result.stdout}")
+                self.logger.error(f"Command stderr: {result.stderr}")
                 return False, None, f"Failed to create issue: {error_msg}"
 
             # Extract issue URL from output
             issue_url = result.stdout.strip()
+            self.logger.info(f"Successfully created issue: {issue_url}")
 
             # Try to add labels separately (ignore failures)
             if issue_data.labels and issue_url:
                 issue_num = issue_url.rstrip("/").split("/")[-1]
+                self.logger.debug(
+                    f"Adding {len(issue_data.labels)} labels to issue #{issue_num}"
+                )
                 for label in issue_data.labels:
                     label_cmd = ["gh", "issue", "edit", issue_num, "--add-label", label]
                     if repo:
                         label_cmd.extend(["--repo", repo])
                     # Run but ignore errors if label doesn't exist
-                    subprocess.run(
+                    label_result = subprocess.run(
                         label_cmd, capture_output=True, text=True, timeout=10
                     )
+                    if label_result.returncode == 0:
+                        self.logger.debug(
+                            f"Added label '{label}' to issue #{issue_num}"
+                        )
+                    else:
+                        self.logger.warning(
+                            f"Failed to add label '{label}': {label_result.stderr.strip()}"
+                        )
 
             # Link to project if configured
             if project_id and issue_url:
+                self.logger.info(f"Linking issue to project {project_id}")
                 # Extract owner from repo or issue URL
                 owner = None
                 if repo:
@@ -511,6 +618,8 @@ Convert this user story to a JSON object following the schema above.
                     url_match = re.search(r"github\.com/([^/]+)/", issue_url)
                     if url_match:
                         owner = url_match.group(1)
+
+                self.logger.debug(f"Extracted owner: {owner}")
 
                 # Add to project using gh CLI
                 project_cmd = [
@@ -526,22 +635,36 @@ Convert this user story to a JSON object following the schema above.
                 if owner:
                     project_cmd.extend(["--owner", owner])
 
+                self.logger.debug(f"Running project command: {' '.join(project_cmd)}")
+
                 project_result = subprocess.run(
                     project_cmd, capture_output=True, text=True, timeout=30
                 )
 
                 if project_result.returncode != 0:
+                    error_msg = (
+                        f"Failed to link to project: {project_result.stderr.strip()}"
+                    )
+                    self.logger.warning(error_msg)
                     console.print(
-                        f"[yellow]Warning:[/yellow] Created issue but failed to link to project: "
-                        f"{project_result.stderr.strip()}"
+                        f"[yellow]Warning:[/yellow] Created issue but {error_msg}"
+                    )
+                else:
+                    self.logger.info(
+                        f"Successfully linked issue to project {project_id}"
                     )
 
             return True, issue_url, None
 
         except subprocess.TimeoutExpired:
-            return False, None, "GitHub issue creation timed out (30s)"
+            error_msg = "GitHub issue creation timed out (30s)"
+            self.logger.error(error_msg)
+            return False, None, error_msg
         except Exception as e:
-            return False, None, f"Unexpected error: {e}"
+            error_msg = f"Unexpected error: {e}"
+            self.logger.error(error_msg)
+            self.logger.exception("Full exception details:")
+            return False, None, error_msg
 
     def convert_and_create(
         self, path: Path, repo: Optional[str] = None, project_id: Optional[int] = None
@@ -560,12 +683,19 @@ Convert this user story to a JSON object following the schema above.
         # Find user story files
         us_files = self._find_user_story_files(path)
 
+        self.logger.info(f"Starting conversion process for path: {path}")
+        self.logger.info(f"Repository: {repo}, Project ID: {project_id}")
+
         if not us_files:
+            self.logger.warning("No user story files found matching pattern")
             console.print(
                 f"[yellow]No user story files found matching pattern US-[number]-[slug].md[/yellow]"
             )
             return []
 
+        self.logger.info(
+            f"Found {len(us_files)} user story files: {[f.name for f in us_files]}"
+        )
         console.print(
             f"[cyan]Found {len(us_files)} user story file(s) to convert[/cyan]\n"
         )
@@ -591,6 +721,10 @@ Convert this user story to a JSON object following the schema above.
                     batch_num = (batch_idx // BATCH_SIZE) + 1
                     total_batches = (len(us_files) + BATCH_SIZE - 1) // BATCH_SIZE
 
+                    self.logger.info(
+                        f"Processing batch {batch_num}/{total_batches} with {len(batch_files)} files"
+                    )
+
                     convert_task = progress.add_task(
                         f"Converting batch {batch_num}/{total_batches} ({len(batch_files)} files) with AI...",
                         total=None,
@@ -603,6 +737,9 @@ Convert this user story to a JSON object following the schema above.
                     progress.remove_task(convert_task)
 
                     if not batch_success:
+                        self.logger.error(
+                            f"Batch {batch_num} conversion failed: {batch_error}"
+                        )
                         # If batch conversion fails, mark all files in batch as failed
                         for us_file in batch_files:
                             results.append(
@@ -614,38 +751,58 @@ Convert this user story to a JSON object following the schema above.
                                 )
                             )
                     else:
+                        self.logger.info(
+                            f"Batch {batch_num} conversion successful, converted {len(batch_issues)} issues"
+                        )
                         # Store successfully converted issues
                         all_converted_issues.update(batch_issues)
 
                 # Now create GitHub issues for all successfully converted files
+                self.logger.info(
+                    f"Creating GitHub issues for {len(all_converted_issues)} converted files"
+                )
                 for us_file in us_files:
                     file_stem = us_file.stem
 
                     # Skip if already marked as failed
                     if any(r.file_path == us_file and not r.success for r in results):
+                        self.logger.debug(
+                            f"Skipping {us_file.name} - already marked as failed"
+                        )
                         continue
 
                     if file_stem not in all_converted_issues:
+                        error_msg = f"AI did not return data for {us_file.name}"
+                        self.logger.error(error_msg)
                         results.append(
                             ConversionResult(
                                 file_path=us_file,
                                 success=False,
-                                error_message=f"AI did not return data for {us_file.name}",
+                                error_message=error_msg,
                             )
                         )
                         continue
 
                     # Parse issue data
                     try:
+                        self.logger.debug(f"Parsing issue data for {us_file.name}")
                         issue_data = GitHubIssueSchema.from_dict(
                             all_converted_issues[file_stem]
                         )
+                        self.logger.debug(
+                            f"Successfully parsed issue: {issue_data.title[:50]}..."
+                        )
                     except Exception as e:
+                        error_msg = f"Failed to parse issue data: {e}"
+                        self.logger.error(error_msg)
+                        self.logger.error(
+                            f"Raw data: {json.dumps(all_converted_issues[file_stem], indent=2)}"
+                        )
                         results.append(
                             ConversionResult(
                                 file_path=us_file,
                                 success=False,
-                                error_message=f"Failed to parse issue data: {e}",
+                                error_message=error_msg,
                             )
                         )
                         continue
@@ -662,6 +819,9 @@ Convert this user story to a JSON object following the schema above.
                     progress.remove_task(task)
 
                     if issue_success:
+                        self.logger.info(
+                            f"Successfully created issue for {us_file.name}: {issue_url}"
+                        )
                         results.append(
                             ConversionResult(
                                 file_path=us_file,
@@ -671,6 +831,9 @@ Convert this user story to a JSON object following the schema above.
                             )
                         )
                     else:
+                        self.logger.error(
+                            f"Failed to create issue for {us_file.name}: {issue_error}"
+                        )
                         results.append(
                             ConversionResult(
                                 file_path=us_file,
@@ -679,6 +842,13 @@ Convert this user story to a JSON object following the schema above.
                                 error_message=f"Issue creation failed: {issue_error}",
                             )
                         )
+
+        # Summary logging
+        success_count = sum(1 for r in results if r.success)
+        failure_count = len(results) - success_count
+        self.logger.info(
+            f"Conversion complete: {success_count} succeeded, {failure_count} failed"
+        )
 
         return results
 

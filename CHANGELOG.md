@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`x100 convert issue` Detailed Logging**: Comprehensive logging with rotation for conversion operations
+  - Logs stored in `.x100/logs/convert.log` with automatic rotation
+  - Rotating file handler with 10MB max per file, keeps 5 backup files
+  - Logs all conversion steps: AI requests, responses, JSON parsing, validation, GitHub API calls
+  - DEBUG level logging includes: file lists, AI response previews (first 500-1000 chars), command execution details
+  - ERROR level logging includes: full error messages, JSON parsing failures with context, GitHub CLI output
+  - Log location displayed in command output for easy access
+  - Helps diagnose conversion failures with detailed audit trail
+
 ## [0.1.2] - 2024-12-10
 
 ### Added

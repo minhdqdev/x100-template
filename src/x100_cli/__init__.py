@@ -884,28 +884,28 @@ def copy_issue_templates(
     package_dir = Path(__file__).parent
     templates_source = package_dir / "templates" / "ISSUE_TEMPLATE"
     templates_dest = project_path / ".github" / "ISSUE_TEMPLATE"
-    
+
     if not templates_source.exists():
         if tracker:
             tracker.skip("issue-templates", "source not found")
         else:
             console.print("[yellow]Warning: Issue template source not found[/yellow]")
         return
-    
+
     try:
         if tracker:
             tracker.start("issue-templates")
-        
+
         # Create destination directory
         templates_dest.mkdir(parents=True, exist_ok=True)
-        
+
         # Copy all template files
         copied = 0
         for template_file in templates_source.glob("*.md"):
             dest_file = templates_dest / template_file.name
             shutil.copy2(template_file, dest_file)
             copied += 1
-        
+
         if tracker:
             if copied > 0:
                 tracker.complete("issue-templates", f"{copied} template(s)")
@@ -920,7 +920,9 @@ def copy_issue_templates(
         if tracker:
             tracker.error("issue-templates", str(e))
         else:
-            console.print(f"[yellow]Warning: Could not copy issue templates: {e}[/yellow]")
+            console.print(
+                f"[yellow]Warning: Could not copy issue templates: {e}[/yellow]"
+            )
 
 
 def ensure_executable_scripts(
@@ -1853,15 +1855,20 @@ def convert(
         console.print(f"[red]Error:[/red] Path not found: {path}")
         raise typer.Exit(1)
 
+    # Create .x100/logs directory if it doesn't exist
+    log_dir = Path.cwd() / ".x100" / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+
     # Create converter and run conversion
     try:
-        converter = IssueConverter(agent_name=agent)
+        converter = IssueConverter(agent_name=agent, log_dir=log_dir)
 
         console.print(f"[cyan]Using AI agent:[/cyan] {converter.agent_config['name']}")
         if repo:
             console.print(f"[cyan]Target repository:[/cyan] {repo}")
         if project_id:
             console.print(f"[cyan]Linking to project:[/cyan] #{project_id}")
+        console.print(f"[cyan]Logs:[/cyan] {log_dir / 'convert.log'}")
         console.print()
 
         results = converter.convert_and_create(
